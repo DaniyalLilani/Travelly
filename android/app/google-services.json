@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "509045979063",
+    "project_id": "travellyotu",
+    "storage_bucket": "travellyotu.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:509045979063:android:85693ce51633023be09a32",
+        "android_client_info": {
+          "package_name": "com.travelly.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8sSCVUxRyxQS4d_RyrVAlMFu5UbMuuBk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
