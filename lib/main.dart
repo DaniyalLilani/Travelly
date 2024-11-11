@@ -8,6 +8,7 @@ import 'screens/profile/theme_provider.dart';
 import 'screens/map_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'package:provider/provider.dart';
+import 'screens/auth/login_screen.dart';
 
 
 void main() async {
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.purple,
         brightness: Brightness.dark,
       ),
-      home: MyHomePage(),
+      home: LoginScreen(),
     );
   }
 }
