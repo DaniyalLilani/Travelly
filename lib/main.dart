@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -8,6 +9,8 @@ import 'screens/profile/theme_provider.dart';
 import 'screens/map_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'package:provider/provider.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/signup_screen.dart';
 
 
 void main() async {
@@ -41,10 +44,16 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.purple,
         brightness: Brightness.dark,
       ),
-      home: MyHomePage(),
+      initialRoute: '/login',  // Force the app to always start at the login page
+      routes: {
+        '/login': (context) => LoginScreen(),
+        '/signup_screen': (context) => SignupScreen(),
+        '/main': (context) => MyHomePage(),
+      },
     );
   }
 }
+
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
