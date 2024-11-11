@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'screens/home_screen.dart';
+import 'screens/home_screen.dart';  
 import 'screens/budget/budget_screen.dart';
 import 'screens/calendar_screen.dart';
-import 'screens/events_screen.dart';
+
 import 'screens/map_screen.dart';
 import 'screens/profile/profile_screen.dart';
 
@@ -38,14 +38,14 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
     HomeScreen(),        
     BudgetScreen(),
-    CalendarScreen(),
-    EventsScreen(),
+    CalendarScreen(initialDate: DateTime.now(),),
     MapScreen(),
     ProfileScreen(),
   ];
@@ -107,13 +107,10 @@ class _MyHomePageState extends State<MyHomePage> {
             label: 'Budget',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
+            icon: Icon(Icons.event),
             label: 'Calendar',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event),
-            label: 'Events',
-          ),
+       
           BottomNavigationBarItem(
             icon: Icon(Icons.map),
             label: 'Map',
