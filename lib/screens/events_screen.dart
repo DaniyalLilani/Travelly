@@ -6,7 +6,7 @@ class EventsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Events')),
       body: Center(
-        child: Text('Explore upcoming events here.'),
+        child: Text('Your planned activities will appear here.'),
       ),
     );
   }
