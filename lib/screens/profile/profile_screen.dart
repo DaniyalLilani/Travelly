@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'edit_profile_screen.dart';
+import 'theme_provider.dart';
+import 'package:provider/provider.dart';
+
 
 class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -134,8 +139,10 @@ class ProfileScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              value: false,
-              onChanged: (bool value) {},
+              value: themeProvider.isDarkMode,
+              onChanged: (bool value) {
+                themeProvider.toggleTheme(value);
+              },
             ),
           ],
         ),

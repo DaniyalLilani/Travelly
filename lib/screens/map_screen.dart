@@ -16,12 +16,12 @@ class _MapScreenState extends State<MapScreen> {
       "image": "https://www.datocms-assets.com/101439/1697302363-tokyo-skytree.webp?auto=format&fit=max&w=1200",
       "comments": [
         {
-          "username": "Alex",
-          "handle": "@alex123",
+          "username": "Dani",
+          "handle": "@Dani123",
           "comment": "Amazing view!",
           "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Tokyo_Skytree_2023.jpg/1200px-Tokyo_Skytree_2023.jpg"
         },
-        {"username": "Bob", "handle": "@bob456", "comment": "A must visit!"}
+        {"username": "Rija", "handle": "@rija456", "comment": "A must visit!"}
       ]
     },
     {
@@ -30,10 +30,10 @@ class _MapScreenState extends State<MapScreen> {
       "location": "Shibuya, Tokyo",
       "image": "",
       "comments": [
-        {"username": "Charlie", "handle": "@charlie789", "comment": "Delicious food!"},
+        {"username": "Huz", "handle": "@Huz789", "comment": "Delicious food!"},
         {
-          "username": "David",
-          "handle": "@david101",
+          "username": "Sahil",
+          "handle": "@Sahil101",
           "comment": "Affordable and tasty.",
           "image": "https://www.foodiesfeed.com/wp-content/uploads/2023/06/burger-with-melted-cheese.jpg"
         }
@@ -99,12 +99,13 @@ class _MapScreenState extends State<MapScreen> {
               onPressed: () {
                 if (commentController.text.isNotEmpty ) {
                   setState(() {
-                    // If an image is selected, use it, otherwise no image for the comment
                     pins[index]["comments"].add({
-                   
+                      "username": "NewUser", // Add a default or dynamic username here
+                      "handle": "@NewUserHandle", // Add a default or dynamic handle here
                       "comment": commentController.text,
-                      "image": _pickedImage != null ? _pickedImage!.path : null, // Only add image if picked
+                      "image": _pickedImage != null ? _pickedImage!.path : '',
                     });
+
                   });
                   Navigator.of(context).pop();
                 }
@@ -280,13 +281,14 @@ class PinDetailsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(comment["comment"], style: TextStyle(color: Colors.grey[700])),
-                      if (comment["image"] != null)
+                      if (comment["image"] != null && comment["image"].isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(top: 8.0),
-                          child: comment["image"]!.startsWith("http")
+                          child: comment["image"].startsWith("http")
                               ? Image.network(comment["image"])
-                              : Image.file(File(comment["image"]!)), // Handle both remote and local images
+                              : Image.file(File(comment["image"])), // Handle both remote and local images
                         ),
+
                     ],
                   ),
                 ),
