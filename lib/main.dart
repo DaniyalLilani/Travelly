@@ -4,9 +4,11 @@ import 'firebase_options.dart';
 import 'screens/home_screen.dart';  
 import 'screens/budget/budget_screen.dart';
 import 'screens/calendar_screen.dart';
-
+import 'screens/profile/theme_provider.dart';
 import 'screens/map_screen.dart';
 import 'screens/profile/profile_screen.dart';
+import 'package:provider/provider.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,17 +16,30 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return MaterialApp(
       title: 'Travelly',
       debugShowCheckedModeBanner: false,
+      themeMode: themeProvider.currentTheme, // Use the theme from ThemeProvider
       theme: ThemeData(
         primarySwatch: Colors.purple,
+        brightness: Brightness.light,
+      ),
+      darkTheme: ThemeData(
+        primarySwatch: Colors.purple,
+        brightness: Brightness.dark,
       ),
       home: MyHomePage(),
     );
