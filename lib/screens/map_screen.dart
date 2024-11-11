@@ -30,7 +30,7 @@ class _MapScreenState extends State<MapScreen> {
       "location": "Shibuya, Tokyo",
       "image": "",
       "comments": [
-        {"username": "Huz", "handle": "@Huz789", "comment": "Delicious food!"},
+        {"username": "Huz", "handle": "@Huzefa789", "comment": "Delicious food!"},
         {
           "username": "Sahil",
           "handle": "@Sahil101",
