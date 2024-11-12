@@ -11,6 +11,7 @@ import 'screens/profile/profile_screen.dart';
 import 'package:provider/provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
+import '../../widgets/travelly_logo.dart';
 
 
 
@@ -90,31 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.airplanemode_active, color: Colors.purple, size: 24),
-            const SizedBox(width: 8),
-            RichText(
-              text: TextSpan(
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-                children: [
-                  TextSpan(text: 'T', style: TextStyle(color: Colors.black)),
-                  TextSpan(text: 'r', style: TextStyle(color: Colors.purple)),
-                  TextSpan(text: 'a', style: TextStyle(color: Colors.black)),
-                  TextSpan(text: 'v', style: TextStyle(color: Colors.purple)),
-                  TextSpan(text: 'e', style: TextStyle(color: Colors.black)),
-                  TextSpan(text: 'l', style: TextStyle(color: Colors.purple)),
-                  TextSpan(text: 'l', style: TextStyle(color: Colors.black)),
-                  TextSpan(text: 'y', style: TextStyle(color: Colors.purple)),
-                ],
-              ),
-            ),
-          ],
-        ),
+        title: TravellyLogo(),
       ),
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
