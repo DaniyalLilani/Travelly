@@ -30,13 +30,14 @@ class _SignupScreenState extends State<SignupScreen> {
         'email': emailController.text.trim(),
         'userID': user?.uid,
         'username': usernameController.text.trim(),
-        'password': passwordController.text.trim()
+        'password': passwordController.text.trim(),
+        'bio': ""
 
         // Add other user fields if necessary
       });
 
       // Navigate to home or main screen after registration
-      Navigator.of(context).pushReplacementNamed('/home');
+      Navigator.of(context).pushReplacementNamed('/main');
     } catch (e) {
       print("Error: $e");
       // Handle errors (e.g., show a dialog to the user)
