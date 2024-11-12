@@ -13,6 +13,7 @@ import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
 
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -44,12 +45,14 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.purple,
         brightness: Brightness.dark,
       ),
+
       initialRoute: '/login',  // Force the app to always start at the login page
       routes: {
         '/login': (context) => LoginScreen(),
         '/signup_screen': (context) => SignupScreen(),
         '/main': (context) => MyHomePage(),
       },
+
     );
   }
 }
