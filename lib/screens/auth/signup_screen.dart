@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+// NOTE: TODO Profile picture later, it may take some time as were not using remote links but actually uploading images from the device
 class SignupScreen extends StatefulWidget {
   @override
   _SignupScreenState createState() => _SignupScreenState();
@@ -32,6 +32,7 @@ class _SignupScreenState extends State<SignupScreen> {
         'username': usernameController.text.trim(),
         'password': passwordController.text.trim(),
         'bio': ""
+        
 
         // Add other user fields if necessary
       });

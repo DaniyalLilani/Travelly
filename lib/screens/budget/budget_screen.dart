@@ -4,9 +4,9 @@ import 'update_budget_screen.dart';
 import 'add_expense_screen.dart';
 
 class BudgetScreen extends StatelessWidget {
-  final double totalBudget = 1000;
-  final double usedBudget = 700; 
-  final List<ExpenseItem> expenses = [
+   double totalBudget = 1000;
+   double usedBudget = 700; 
+   List<ExpenseItem> expenses = [
     ExpenseItem(name: 'Transportation', cost: 350),
     ExpenseItem(name: 'Accommodation', cost: 250),
     ExpenseItem(name: 'Food', cost: 100),
