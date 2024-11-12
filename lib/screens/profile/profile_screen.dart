@@ -6,8 +6,11 @@ import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   @override
+
+  
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+
 
     return Scaffold(
       appBar: AppBar(
