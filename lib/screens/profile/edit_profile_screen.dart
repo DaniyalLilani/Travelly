@@ -1,9 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class EditProfileScreen extends StatelessWidget {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _bioController = TextEditingController();
+class EditProfileScreen extends StatefulWidget {
+  final String username;
+  final String email;
+  final String bio;
+
+  EditProfileScreen({
+    required this.username,
+    required this.email,
+    required this.bio,
+  });
+
+  @override
+  _EditProfileScreenState createState() => _EditProfileScreenState();
+}
+
+class _EditProfileScreenState extends State<EditProfileScreen> {
+  late TextEditingController _nameController;
+  late TextEditingController _emailController;
+  late TextEditingController _bioController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.username);
+    _emailController = TextEditingController(text: widget.email);
+    _bioController = TextEditingController(text: widget.bio);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _bioController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _updateUser() async{
+    try{
+      print("Inside update user");
+      String userId = FirebaseAuth.instance.currentUser!.uid;
+      
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'username': _nameController.text,
+        'bio': _bioController.text,
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Profile has been successfully updated!')),
+      );
+      Navigator.pop(context, {
+      'username': _nameController.text,
+      'bio': _bioController.text,
+    });
+
+
+
+
+    } catch(error){
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error updating profile: $error')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,36 +82,6 @@ class EditProfileScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    height: 150,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage(''), 
-                        fit: BoxFit.cover,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                    ),
-                    child: const Text(
-                      'Change Profile Picture',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
@@ -66,7 +96,7 @@ class EditProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            TextField(
+            /*TextField(
               controller: _emailController,
               decoration: InputDecoration(
                 labelText: 'Email',
@@ -78,7 +108,8 @@ class EditProfileScreen extends StatelessWidget {
                   borderSide: BorderSide.none,
                 ),
               ),
-            ),
+            ), we cannot allow a user to change their email so simply, this will really mess up the firebase Auth
+            */
             const SizedBox(height: 16),
             TextField(
               controller: _bioController,
@@ -96,9 +127,7 @@ class EditProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context); 
-              },
+              onPressed: _updateUser,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.purple,
                 minimumSize: const Size(double.infinity, 50),
@@ -114,11 +143,11 @@ class EditProfileScreen extends StatelessWidget {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context); 
+                Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey[200],
-                minimumSize: const Size(double.infinity, 50), 
+                minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
