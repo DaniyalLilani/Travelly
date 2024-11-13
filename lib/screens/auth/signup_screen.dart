@@ -27,6 +27,12 @@ class _SignupScreenState extends State<SignupScreen> {
       await _firestore.collection('users').doc(user?.uid).set({
         'email': emailController.text.trim(),
         'userID': user?.uid,
+        'username': usernameController.text.trim(),
+        'password': passwordController.text.trim(),
+        'bio': ""
+        
+
+        // Add other user fields if necessary
       });
 
       Navigator.of(context).pushReplacementNamed('/main');
