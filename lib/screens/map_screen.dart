@@ -41,33 +41,27 @@ class _MapScreenState extends State<MapScreen> {
     },
   ];
 
-  File? _pickedImage; // Holds the picked image for comment
-  String _searchQuery = ''; // Search query for searching comments and pins
+  File? _pickedImage;
+  String _searchQuery = '';
 
-  // Function to show the comment popup
   void showCommentDialog(int index) {
     final commentController = TextEditingController();
-
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text("Add a comment"),
-          content: SingleChildScrollView( // Make the content scrollable
+          content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-
-                const SizedBox(height: 10),
-    
                 const SizedBox(height: 10),
                 TextField(
                   controller: commentController,
                   decoration: InputDecoration(hintText: "Write your comment here"),
                 ),
                 const SizedBox(height: 10),
-                // Image upload button
                 ElevatedButton(
                   onPressed: () async {
                     final picker = ImagePicker();
@@ -80,7 +74,7 @@ class _MapScreenState extends State<MapScreen> {
                   },
                   child: Text("Upload an Image"),
                 ),
-                if (_pickedImage != null) // Show selected image preview
+                if (_pickedImage != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 10.0),
                     child: Image.file(_pickedImage!, width: 100, height: 100),
@@ -91,21 +85,20 @@ class _MapScreenState extends State<MapScreen> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog without saving
+                Navigator.of(context).pop();
               },
               child: Text("Cancel"),
             ),
             TextButton(
               onPressed: () {
-                if (commentController.text.isNotEmpty ) {
+                if (commentController.text.isNotEmpty) {
                   setState(() {
                     pins[index]["comments"].add({
-                      "username": "NewUser", // Add a default or dynamic username here
-                      "handle": "@NewUserHandle", // Add a default or dynamic handle here
+                      "username": "NewUser",
+                      "handle": "@NewUserHandle",
                       "comment": commentController.text,
                       "image": _pickedImage != null ? _pickedImage!.path : '',
                     });
-
                   });
                   Navigator.of(context).pop();
                 }
@@ -118,7 +111,6 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  // Function to navigate to the view pin screen
   void viewPinDetails(int index) {
     Navigator.push(
       context,
@@ -128,7 +120,6 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  // Function to filter pins based on the search query
   List<Map<String, dynamic>> getFilteredPins() {
     return pins.where((pin) {
       return pin["title"].toLowerCase().contains(_searchQuery.toLowerCase()) ||
@@ -140,13 +131,19 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Explore Pins"),
-        backgroundColor: Colors.purple,
-      ),
-      body: Column(
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const Text(
+            'Explore Pins',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
@@ -162,69 +159,58 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ),
           ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Community Pins Section
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      "Community Pins",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  ...getFilteredPins().map((pin) {
-                    int pinIndex = pins.indexOf(pin);
-                    return Card(
-                      margin: EdgeInsets.all(10),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  "Community Pins",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+              ...getFilteredPins().map((pin) {
+                int pinIndex = pins.indexOf(pin);
+                return Card(
+                  margin: EdgeInsets.all(10),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          pin["title"],
+                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        ),
+                        Text("Rated: ${pin["rating"]} ⭐"),
+                        SizedBox(height: 8),
+                        Row(
                           children: [
-                            Text(
-                              pin["title"],
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
+                            IconButton(
+                              icon: Icon(
+                                pin["liked"] == true ? Icons.thumb_up : Icons.thumb_up_alt_outlined,
+                                color: pin["liked"] == true ? Colors.blue : Colors.grey,
                               ),
+                              onPressed: () => setState(() {
+                                pin["liked"] = !(pin["liked"] ?? false);
+                              }),
                             ),
-                            Text("Rated: ${pin["rating"]} ⭐"),
-                            SizedBox(height: 8),
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: Icon(
-                                    pin["liked"] == true
-                                        ? Icons.thumb_up
-                                        : Icons.thumb_up_alt_outlined,
-                                    color: pin["liked"] == true ? Colors.blue : Colors.grey,
-                                  ),
-                                  onPressed: () => setState(() {
-                                    pin["liked"] = !(pin["liked"] ?? false);
-                                  }),
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.comment),
-                                  onPressed: () => showCommentDialog(pinIndex),
-                                ),
-                              ],
+                            IconButton(
+                              icon: Icon(Icons.comment),
+                              onPressed: () => showCommentDialog(pinIndex),
                             ),
-                            SizedBox(height: 8),
-                            if (pin["comments"].isNotEmpty)
-                              ElevatedButton(
-                                onPressed: () => viewPinDetails(pinIndex),
-                                child: Text("View Comments"),
-                              ),
                           ],
                         ),
-                      ),
-                    );
-                  }).toList(),
-                ],
-              ),
-            ),
+                        if (pin["comments"].isNotEmpty)
+                          ElevatedButton(
+                            onPressed: () => viewPinDetails(pinIndex),
+                            child: Text("View Comments"),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ],
           ),
         ],
       ),
@@ -244,56 +230,52 @@ class PinDetailsScreen extends StatelessWidget {
         title: Text(pin["title"]),
         backgroundColor: Colors.purple,
       ),
-      body: SingleChildScrollView( // Make the comments section scrollable
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                pin["title"],
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text("Location: ${pin["location"]}"),
-              SizedBox(height: 8),
-              Text("Rating: ${pin["rating"]} ⭐"),
-              SizedBox(height: 16),
-              Text("Comments:"),
-              SizedBox(height: 8),
-              // Show all the comments for the pin
-              for (var comment in pin["comments"])
-                ListTile(
-                  title: Row(
-                    children: [
-                      Text(
-                        "${comment["username"]}:",
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
-                      ),
-                      SizedBox(width: 5),
-                      Text(
-                        comment["handle"],
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(comment["comment"], style: TextStyle(color: Colors.grey[700])),
-                      if (comment["image"] != null && comment["image"].isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: comment["image"].startsWith("http")
-                              ? Image.network(comment["image"])
-                              : Image.file(File(comment["image"])), // Handle both remote and local images
-                        ),
-
-                    ],
-                  ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              pin["title"],
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text("Location: ${pin["location"]}"),
+            SizedBox(height: 8),
+            Text("Rating: ${pin["rating"]} ⭐"),
+            SizedBox(height: 16),
+            Text("Comments:"),
+            SizedBox(height: 8),
+            for (var comment in pin["comments"])
+              ListTile(
+                title: Row(
+                  children: [
+                    Text(
+                      "${comment["username"]}:",
+                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                    ),
+                    SizedBox(width: 5),
+                    Text(
+                      comment["handle"],
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ],
                 ),
-            ],
-          ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(comment["comment"], style: TextStyle(color: Colors.grey[700])),
+                    if (comment["image"] != null && comment["image"].isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: comment["image"].startsWith("http")
+                            ? Image.network(comment["image"])
+                            : Image.file(File(comment["image"])),
+                      ),
+                  ],
+                ),
+              ),
+          ],
         ),
       ),
     );
