@@ -14,6 +14,7 @@ class BudgetScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     double remainingBudget = totalBudget - usedBudget;
     double remainingPercentage = (remainingBudget / totalBudget) * 100;
 
@@ -22,11 +23,12 @@ class BudgetScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+           Text(
             'Budget',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : Colors.black,
             ),
           ),
           const SizedBox(height: 16),
@@ -37,7 +39,7 @@ class BudgetScreen extends StatelessWidget {
                 series: <CircularSeries>[
                   DoughnutSeries<ChartData, String>(
                     dataSource: [
-                      ChartData('Used', usedBudget, Colors.black),
+                      ChartData('Used', usedBudget, isDarkMode ? Colors.white : Colors.black),
                       ChartData('Remaining', remainingBudget, Colors.purple), 
                     ],
                     xValueMapper: (ChartData data, _) => data.label,
@@ -56,7 +58,7 @@ class BudgetScreen extends StatelessWidget {
                         Text(
                           'Remaining',
                           style: TextStyle(
-                            color: Colors.black54,
+                            color: isDarkMode ? Colors.white70 : Colors.black54,
                             fontSize: 16,
                           ),
                         ),
@@ -78,7 +80,7 @@ class BudgetScreen extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'You have \$${remainingBudget.toStringAsFixed(0)} remaining out of your budget.',
-            style: TextStyle(fontSize: 16, color: Colors.black54),
+            style: TextStyle(fontSize: 16, color: isDarkMode ? Colors.white70 : Colors.black54,),
           ),
           const SizedBox(height: 16),
           Row(
@@ -86,10 +88,10 @@ class BudgetScreen extends StatelessWidget {
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children:  [
                   Text(
                     'Start',
-                    style: TextStyle(color: Colors.black54),
+                    style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
                   ),
                   Text(
                     'Tue, Oct 15',
@@ -99,10 +101,10 @@ class BudgetScreen extends StatelessWidget {
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children:  [
                   Text(
                     'End',
-                    style: TextStyle(color: Colors.black54),
+                    style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
                   ),
                   Text(
                     'Thurs, Oct 31',
@@ -113,13 +115,13 @@ class BudgetScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Overall Budget',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,color: isDarkMode ? Colors.white : Colors.black,),
           ),
           Text(
             '\$${totalBudget.toStringAsFixed(0)}',
-            style: const TextStyle(fontSize: 24),
+            style:  TextStyle(fontSize: 24, color: isDarkMode ? Colors.white : Colors.black,),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
@@ -142,9 +144,9 @@ class BudgetScreen extends StatelessWidget {
             child: const Text('Update Budget'),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Expenses',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black,),
           ),
           const SizedBox(height: 8),
           // List of Expenses
@@ -153,7 +155,7 @@ class BudgetScreen extends StatelessWidget {
               return ListTile(
                 title: Text(
                   expense.name,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style:  TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black,),
                 ),
                 subtitle: Text('\$${expense.cost}'),
                 trailing: IconButton(

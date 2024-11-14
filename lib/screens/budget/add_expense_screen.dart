@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 class AddExpenseScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Expense'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        foregroundColor:isDarkMode ? Colors.white : Colors.black,
         elevation: 0,
       ),
       body: Padding(
@@ -19,13 +20,13 @@ class AddExpenseScreen extends StatelessWidget {
               decoration: InputDecoration(
                 labelText: 'Name',
                 labelStyle: TextStyle(
-                  color: Colors.black,
+                  color: isDarkMode ? Colors.white : Colors.black,
                   fontWeight: FontWeight.bold,
                 ),
                 hintText: 'Enter the expense name',
-                hintStyle: TextStyle(color: Colors.black54),
+                hintStyle: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54,),
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
@@ -37,13 +38,13 @@ class AddExpenseScreen extends StatelessWidget {
               decoration: InputDecoration(
                 labelText: 'Cost',
                 labelStyle: TextStyle(
-                  color: Colors.black,
+                  color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
                   fontWeight: FontWeight.bold,
                 ),
                 hintText: 'Enter the cost',
-                hintStyle: TextStyle(color: Colors.black54),
+                hintStyle: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
@@ -75,8 +76,8 @@ class AddExpenseScreen extends StatelessWidget {
                 Navigator.pop(context); 
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[200],
-                foregroundColor: Colors.black, 
+                backgroundColor: isDarkMode ? Colors.white : Colors.grey[200],
+                foregroundColor: isDarkMode ? Colors.black : Colors.black, 
                 minimumSize: const Size(double.infinity, 50), 
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
