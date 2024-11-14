@@ -8,6 +8,7 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  //list of pins with location, rating , comments.. each pin has info like title, rating, location, image
   List<Map<String, dynamic>> pins = [
     {
       "title": "Tokyo Skytree",
@@ -41,12 +42,12 @@ class _MapScreenState extends State<MapScreen> {
     },
   ];
 
-  File? _pickedImage;
-  String _searchQuery = '';
-
+  File? _pickedImage; //stores image file picked by the user
+  String _searchQuery = '';//keeps track of the search query entered by the user
+  //opens dialog box for adding comments to a pin, allowing for comment to be added
   void showCommentDialog(int index) {
     final commentController = TextEditingController();
-
+    
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -57,16 +58,16 @@ class _MapScreenState extends State<MapScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 10),
-                TextField(
+                TextField( //textfield for entering comment
                   controller: commentController,
                   decoration: InputDecoration(hintText: "Write your comment here"),
                 ),
                 const SizedBox(height: 10),
-                ElevatedButton(
+                ElevatedButton( //button to upload image
                   onPressed: () async {
                     final picker = ImagePicker();
                     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-                    if (pickedFile != null) {
+                    if (pickedFile != null) { //display image if been selected
                       setState(() {
                         _pickedImage = File(pickedFile.path);
                       });
@@ -82,6 +83,7 @@ class _MapScreenState extends State<MapScreen> {
               ],
             ),
           ),
+          //cancel button to close dialog without saving comment
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -89,10 +91,12 @@ class _MapScreenState extends State<MapScreen> {
               },
               child: Text("Cancel"),
             ),
+            //submit button to save the comment and closs dialog
             TextButton(
               onPressed: () {
                 if (commentController.text.isNotEmpty) {
                   setState(() {
+                    //adding a new comment to specified pin with user input
                     pins[index]["comments"].add({
                       "username": "NewUser",
                       "handle": "@NewUserHandle",
@@ -110,7 +114,7 @@ class _MapScreenState extends State<MapScreen> {
       },
     );
   }
-
+  // navigates to a detailed page displaying details of selected pin
   void viewPinDetails(int index) {
     Navigator.push(
       context,
@@ -119,7 +123,7 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
   }
-
+  //filters the pins based on search query. checks title and comments
   List<Map<String, dynamic>> getFilteredPins() {
     return pins.where((pin) {
       return pin["title"].toLowerCase().contains(_searchQuery.toLowerCase()) ||
@@ -131,6 +135,7 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -144,7 +149,7 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Padding(
+          Padding( //search bar to filer pins based on input
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               onChanged: (query) {
@@ -168,6 +173,7 @@ class _MapScreenState extends State<MapScreen> {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
+              //iterate over each filtered pin to display its details in a card
               ...getFilteredPins().map((pin) {
                 int pinIndex = pins.indexOf(pin);
                 return Card(
@@ -181,8 +187,11 @@ class _MapScreenState extends State<MapScreen> {
                           pin["title"],
                           style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                         ),
-                        Text("Rated: ${pin["rating"]} ⭐"),
+                        //displays the rating
+                        Text("Rated: ${pin["rating"]} ⭐",
+                        style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),),
                         SizedBox(height: 8),
+                        //like and comment buttons
                         Row(
                           children: [
                             IconButton(
@@ -200,6 +209,7 @@ class _MapScreenState extends State<MapScreen> {
                             ),
                           ],
                         ),
+                        //buttons to view comments if any
                         if (pin["comments"].isNotEmpty)
                           ElevatedButton(
                             onPressed: () => viewPinDetails(pinIndex),
@@ -217,7 +227,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 }
-
+//shows details of selected pin in seperated screen
 class PinDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> pin;
 
@@ -225,6 +235,7 @@ class PinDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: Text(pin["title"]),
@@ -240,9 +251,11 @@ class PinDetailsScreen extends StatelessWidget {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
-            Text("Location: ${pin["location"]}"),
+            Text("Location: ${pin["location"]}",
+            style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),),
             SizedBox(height: 8),
-            Text("Rating: ${pin["rating"]} ⭐"),
+            Text("Rating: ${pin["rating"]} ⭐", 
+            style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),),
             SizedBox(height: 16),
             Text("Comments:"),
             SizedBox(height: 8),
@@ -257,20 +270,22 @@ class PinDetailsScreen extends StatelessWidget {
                     SizedBox(width: 5),
                     Text(
                       comment["handle"],
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.grey),
                     ),
                   ],
                 ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(comment["comment"], style: TextStyle(color: Colors.grey[700])),
+                    Text(comment["comment"], style: TextStyle(color: isDarkMode ? Colors.white : Colors.grey[700]),
+                    ),
+                    //if image is provided display it below comment
                     if (comment["image"] != null && comment["image"].isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: comment["image"].startsWith("http")
-                            ? Image.network(comment["image"])
-                            : Image.file(File(comment["image"])),
+                            ? Image.network(comment["image"]) //display network image
+                            : Image.file(File(comment["image"])),//display local file
                       ),
                   ],
                 ),

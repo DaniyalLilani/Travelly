@@ -26,6 +26,7 @@ class _UpdateBudgetScreenState extends State<UpdateBudgetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Update Budget'),
@@ -43,13 +44,13 @@ class _UpdateBudgetScreenState extends State<UpdateBudgetScreen> {
               decoration: InputDecoration(
                 labelText: 'Budget',
                 labelStyle: TextStyle(
-                  color: Colors.black,
+                  color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
                   fontWeight: FontWeight.bold,
                 ),
                 hintText: 'Enter your budget amount',
-                hintStyle: TextStyle(color: Colors.black54),
+                hintStyle: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
@@ -65,17 +66,17 @@ class _UpdateBudgetScreenState extends State<UpdateBudgetScreen> {
               decoration: InputDecoration(
                 labelText: 'Start Date',
                 labelStyle: TextStyle(
-                  color: Colors.black,
+                  color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
                   fontWeight: FontWeight.bold,
                 ),
                 hintText: 'Enter start date',
-                hintStyle: TextStyle(color: Colors.black54),
+                hintStyle: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
                 prefixIcon: IconButton(
                   icon: Icon(Icons.calendar_today, color: Colors.purple),
                   onPressed: () => _selectDate(context, _startDateController),
                 ),
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
@@ -90,17 +91,17 @@ class _UpdateBudgetScreenState extends State<UpdateBudgetScreen> {
               decoration: InputDecoration(
                 labelText: 'End Date',
                 labelStyle: TextStyle(
-                  color: Colors.black,
+                  color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
                   fontWeight: FontWeight.bold,
                 ),
                 hintText: 'Enter end date',
-                hintStyle: TextStyle(color: Colors.black54),
+                hintStyle: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
                 prefixIcon: IconButton(
                   icon: Icon(Icons.calendar_today, color: Colors.purple),
                   onPressed: () => _selectDate(context, _endDateController),
                 ),
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.grey[800] : Colors.grey[200],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
@@ -131,8 +132,8 @@ class _UpdateBudgetScreenState extends State<UpdateBudgetScreen> {
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[200],
-                foregroundColor: Colors.black,
+                backgroundColor: isDarkMode ? Colors.white : Colors.grey[200],
+                foregroundColor: isDarkMode ? Colors.black : Colors.black, 
                 minimumSize: const Size(double.infinity, 50), 
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),

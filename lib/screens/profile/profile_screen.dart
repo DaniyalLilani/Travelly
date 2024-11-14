@@ -74,6 +74,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 CircleAvatar(
                   radius: 30, // Sets avatar size.
+                  backgroundColor: const Color.fromARGB(255, 227, 175, 236),
                   backgroundImage: AssetImage(''), // Placeholder for profile image.
                 ),
                 const SizedBox(width: 16), // Adds space between avatar and text.
@@ -89,7 +90,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                      Text(
                       email, // Email displayed in profile from firebase .
-                      style: TextStyle(color: Colors.black54, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black54, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -140,16 +143,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 8), // Space below header.
             RichText(
-              text: const TextSpan(
-                style: TextStyle(fontSize: 16, color: Colors.black),
+              text:  TextSpan(
+                style: TextStyle(fontSize: 16, color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,),
                 children: [
                   TextSpan(
                     text: 'Location: ', // Label for location information.
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,),
                   ),
                   TextSpan(
                     text: 'Oshawa, ON', // User's location.
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,),
                   ),
                 ],
               ),
@@ -157,15 +166,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 4), // Space before bio section.
             RichText(
               text:  TextSpan(
-                style: TextStyle(fontSize: 16, color: Colors.black),
+                style: TextStyle(fontSize: 16, color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,),
                 children: [
                   TextSpan(
                     text: 'Bio: $bio ' , // Label for bio information.
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,),
                   ),
                   TextSpan(
                     //text: 'bio: $bio', // User's bio.
-                    style: TextStyle(fontWeight: FontWeight.normal),
+                    style: TextStyle(fontWeight: FontWeight.normal, color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,),
                   ),
                 ],
               ),

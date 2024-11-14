@@ -3,7 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 
 class CalendarScreen extends StatefulWidget {
   final DateTime initialDate;
-
+  //constructor which takes the initial date
   CalendarScreen({required this.initialDate});
 
   @override
@@ -11,11 +11,16 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
+  //notifier for events on selected day, allows us to update ui reactiviely 
   late final ValueNotifier<List<String>> _selectedEvents;
+  //tracks the calendar format
   late final CalendarFormat _calendarFormat;
+  //tracks the selected and currently viewed days
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
+  // Map to store events, where each date has a list of event descriptions
   final Map<DateTime, List<String>> _events = {};
+  // Controllers for input fields in the add event dialog
   TextEditingController _activityController = TextEditingController();
   TextEditingController _timeController = TextEditingController();
   TextEditingController _locationController = TextEditingController();
@@ -24,15 +29,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
+    // Initialize selected events and calendar format
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay));
     _calendarFormat = CalendarFormat.month;
     _selectedDay = widget.initialDate;
   }
-
+  // Get events for a specific day from the map, or return an empty list if none exist
   List<String> _getEventsForDay(DateTime day) {
     return _events[day] ?? [];
   }
-
+  // Function to show a time picker and update the time for an event
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay picked = await showTimePicker(
       context: context,
@@ -44,7 +50,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       _timeController.text = _eventTime.format(context);
     });
   }
-
+  // Function to add a new event to the selected date
   void _addEvent(String activityName, String time, String location, DateTime selectedDate) {
     if (_events[selectedDate] == null) {
       _events[selectedDate] = [];
@@ -96,23 +102,38 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 color: Colors.blueAccent,
                 shape: BoxShape.circle,
               ),
+              // ensure weekend text is visible in dark mode
               todayTextStyle: TextStyle(color: Colors.white),
-              weekendTextStyle: TextStyle(color: Colors.black),
+              weekendTextStyle: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,),
             ),
             headerStyle: HeaderStyle(
-              titleTextStyle: TextStyle(color: Colors.black),
-              formatButtonTextStyle: TextStyle(color: Colors.black),
-              formatButtonDecoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-              ),
+            titleTextStyle: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.white 
+                  : Colors.black,
             ),
+            formatButtonTextStyle: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.white 
+                  : Colors.black,
+            ),
+            formatButtonDecoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey[700] 
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+
             calendarFormat: _calendarFormat,
           ),
           const SizedBox(height: 16),
           Text(
             'Your activities on ${_selectedDay.toLocal().toString().split(' ')[0]}',
-            style: TextStyle(fontSize: 16, color: Colors.black54),
+            style: TextStyle(fontSize: 16, 
+              color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.white 
+                : Colors.grey[600],),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -120,6 +141,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
+          // Button to open the add activity dialog
           Center(
             child: SizedBox(
               width: double.infinity,
@@ -132,12 +154,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         title: const Text('Add Activity'),
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
-                          children: [
+                          children: [ //text field for activity name
                             TextField(
                               controller: _activityController,
                               decoration: const InputDecoration(hintText: 'Activity Name'),
                             ),
                             const SizedBox(height: 10),
+                            // textfield to select time
                             TextField(
                               controller: _timeController,
                               decoration: InputDecoration(
@@ -157,17 +180,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             ),
                           ],
                         ),
-                        actions: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        actions: [
+                          Column(
                             children: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
+                              // "Save" button styled as purple with white text
+                              ElevatedButton(
                                 onPressed: () {
                                   if (_activityController.text.isNotEmpty && _timeController.text.isNotEmpty) {
                                     _addEvent(
@@ -181,7 +198,39 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     Navigator.of(context).pop();
                                   }
                                 },
-                                child: const Text('Save'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.purple,
+                                  foregroundColor: Colors.white,
+                                  minimumSize: const Size(double.infinity, 50),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Save',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+
+                              // "Cancel" button styled as a white box with black text
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.black,
+                                  minimumSize: const Size(double.infinity, 50),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    side: const BorderSide(color: Colors.grey),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Cancel',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
                               ),
                             ],
                           ),
@@ -202,6 +251,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
           ),
           const SizedBox(height: 16),
+          
           ValueListenableBuilder<List<String>>(
             valueListenable: _selectedEvents,
             builder: (context, events, _) {
@@ -212,20 +262,28 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(8),
-                      tileColor: Colors.grey[200],
+                      tileColor: Theme.of(context).brightness == Brightness.dark 
+                       ? Colors.grey[800] 
+                        : Colors.grey[200],
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                       title: Text(
                         event.split(' at ')[0],
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style:  TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.white 
+                  : Colors.black,),
                       ),
+                      // Displaying event details with dynamic color based on mode
                       subtitle: Text(
                         event.split(' at ')[1],
-                        style: const TextStyle(color: Colors.grey),
+                        style: TextStyle(color: Theme.of(context).brightness == Brightness.dark 
+                                        ? Colors.white 
+                                        : Colors.grey[600],),
                       ),
+                      //delete icon to remocve event
                       trailing: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.black),
+                        icon:  Icon(Icons.delete, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
                         onPressed: () {
                           setState(() {
                             _events[_selectedDay]!.remove(event);
