@@ -134,8 +134,12 @@ class BudgetScreen extends StatelessWidget {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
+              backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white // White background in dark mode
+              : Colors.black,
+              foregroundColor: Theme.of(context).brightness == Brightness.dark
+              ? Colors.black // Black text in dark mode
+              : Colors.white,
               minimumSize: const Size(double.infinity, 50), 
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -159,7 +163,10 @@ class BudgetScreen extends StatelessWidget {
                 ),
                 subtitle: Text('\$${expense.cost}'),
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
+                  icon: Icon(Icons.delete, color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white 
+                : Colors.black, 
+                ),
                   onPressed: () {
                   },
                 ),
@@ -177,8 +184,12 @@ class BudgetScreen extends StatelessWidget {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
+              backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white
+              : Colors.black,
+              foregroundColor: Theme.of(context).brightness == Brightness.dark
+              ? Colors.black
+              : Colors.white,
               minimumSize: const Size(double.infinity, 50), 
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
