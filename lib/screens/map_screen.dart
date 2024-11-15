@@ -1,6 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../services/database_helper.dart'; // Import the SQLite helper class
+
+/************************************** 
+NEXT ITERATION.
+LOAD ALL PINS AND COMMENTS FROM FIREBASE
+PUSH THEM TO FIREBASE
+CACHE RESULTS LOCALLY (which we are doing with local edits right now)
+THIS WILL ALLOW FOR A FUTURE OFFLINE MODE
+FOR TA: In terms of the midpoint checkin, this is our local storage implementation
+
+Firebase ---> SQflite --> User ---> SQflite 
+                           |
+                           |
+                           | ------> Firebase
+***************************************/
+
+
 
 class MapScreen extends StatefulWidget {
   @override
@@ -16,13 +33,8 @@ class _MapScreenState extends State<MapScreen> {
       "location": "Tokyo, Japan",
       "image": "https://www.datocms-assets.com/101439/1697302363-tokyo-skytree.webp?auto=format&fit=max&w=1200",
       "comments": [
-        {
-          "username": "Dani",
-          "handle": "@Dani123",
-          "comment": "Amazing view!",
-          "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Tokyo_Skytree_2023.jpg/1200px-Tokyo_Skytree_2023.jpg"
-        },
-        {"username": "Rija", "handle": "@rija456", "comment": "A must visit!"}
+    // Gets filled with user inputs
+       
       ]
     },
     {
@@ -31,13 +43,6 @@ class _MapScreenState extends State<MapScreen> {
       "location": "Shibuya, Tokyo",
       "image": "",
       "comments": [
-        {"username": "Huz", "handle": "@Huzefa789", "comment": "Delicious food!"},
-        {
-          "username": "Sahil",
-          "handle": "@Sahil101",
-          "comment": "Affordable and tasty.",
-          "image": "https://www.foodiesfeed.com/wp-content/uploads/2023/06/burger-with-melted-cheese.jpg"
-        }
       ]
     },
   ];
@@ -45,9 +50,10 @@ class _MapScreenState extends State<MapScreen> {
   File? _pickedImage; //stores image file picked by the user
   String _searchQuery = '';//keeps track of the search query entered by the user
   //opens dialog box for adding comments to a pin, allowing for comment to be added
-  void showCommentDialog(int index) {
+  void showCommentDialog(int index) async {
     final commentController = TextEditingController();
-    
+    final dbHelper = DatabaseHelper();
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -58,16 +64,16 @@ class _MapScreenState extends State<MapScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 10),
-                TextField( //textfield for entering comment
+                TextField(
                   controller: commentController,
                   decoration: InputDecoration(hintText: "Write your comment here"),
                 ),
                 const SizedBox(height: 10),
-                ElevatedButton( //button to upload image
+                ElevatedButton(
                   onPressed: () async {
                     final picker = ImagePicker();
                     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-                    if (pickedFile != null) { //display image if been selected
+                    if (pickedFile != null) {
                       setState(() {
                         _pickedImage = File(pickedFile.path);
                       });
@@ -83,7 +89,6 @@ class _MapScreenState extends State<MapScreen> {
               ],
             ),
           ),
-          //cancel button to close dialog without saving comment
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -91,18 +96,22 @@ class _MapScreenState extends State<MapScreen> {
               },
               child: Text("Cancel"),
             ),
-            //submit button to save the comment and closs dialog
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 if (commentController.text.isNotEmpty) {
+                  Map<String, String> newComment = { // change to use firebase commands.
+                    "pinId": index.toString(),
+                    "username": "NewUser",
+                    "handle": "@NewUserHandle",
+                    "comment": commentController.text,
+                    "image": _pickedImage?.path ?? '',
+                  };
+                  int pinId = index;
+                  await dbHelper.insertComment(newComment, pinId);
+                  print(newComment);
                   setState(() {
-                    //adding a new comment to specified pin with user input
-                    pins[index]["comments"].add({
-                      "username": "NewUser",
-                      "handle": "@NewUserHandle",
-                      "comment": commentController.text,
-                      "image": _pickedImage != null ? _pickedImage!.path : '',
-                    });
+                    print(newComment);
+                    pins[index]["comments"].add(newComment);
                   });
                   Navigator.of(context).pop();
                 }
@@ -114,8 +123,16 @@ class _MapScreenState extends State<MapScreen> {
       },
     );
   }
+
   // navigates to a detailed page displaying details of selected pin
-  void viewPinDetails(int index) {
+  void viewPinDetails(int index) async {
+    final dbHelper = DatabaseHelper();
+    final dbComments = await dbHelper.fetchComments(index);
+
+    setState(() {
+      pins[index]["comments"] = dbComments;
+    });
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -123,6 +140,7 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
   }
+
   //filters the pins based on search query. checks title and comments
   List<Map<String, dynamic>> getFilteredPins() {
     return pins.where((pin) {
