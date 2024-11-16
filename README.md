@@ -16,8 +16,8 @@ Profile Page: This page allows users to view and update their personal informati
 
 ### Group members Responsibilities:
 
-Daniyal - Backend / Database  
-Sahil - Frontend / UI  
-Rija - Frontend / UI  
-Huzefa - Backend / Database  
+Daniyal (100867494) - Backend / Database  
+Sahil (100881460) - Frontend / UI  
+Rija (100746674) - Frontend / UI  
+Huzefa (100815505) - Backend / Database  
 
