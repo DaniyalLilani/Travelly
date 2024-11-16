@@ -9,13 +9,16 @@ plugins {
 }
 
 android {
+    // Define the namespace to avoid issues with AGP 7.x+ requiring a namespace declaration.
     namespace = "com.travelly.app"
+
+    // Using Flutter's SDK version variables
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
@@ -23,25 +26,30 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // Application ID is used for identifying the app on the Play Store or when installing.
         applicationId = "com.travelly.app"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        
+        // Minimum SDK required for the app.
         minSdk = 23
+
+        // Target SDK version to optimize the app for.
         targetSdk = flutter.targetSdkVersion
+
+        // Version code and name can be updated with each release.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Signing config for release build.
+            // For production, you should set up your own signing configurations.
             signingConfig = signingConfigs.debug
         }
     }
 }
 
 flutter {
+    // The location of your Flutter SDK.
     source = "../.."
 }

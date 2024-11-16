@@ -26,7 +26,7 @@ dependencies:
   firebase_storage: ^12.3.4  
   syncfusion_flutter_charts: ^20.2.45
   table_calendar: ^3.1.2
-
+  flutter_local_notifications: ^18.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

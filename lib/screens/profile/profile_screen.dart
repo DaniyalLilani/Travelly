@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // For Firestore access.
-import 'package:firebase_auth/firebase_auth.dart'; // For Firebase Authentication.
-import 'edit_profile_screen.dart'; // Importing the screen to edit the profile.
-import 'theme_provider.dart'; // Importing the theme provider for managing theme changes.
-import 'package:provider/provider.dart'; // Importing provider for state management.
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import 'edit_profile_screen.dart';
+import 'theme_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -11,209 +12,263 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String username = ""; // Variable to store the username.
-  String bio = ""; // Variable to store the bio
-  // We will add profile picture last
+  String username = ""; 
+  String bio = ""; 
   String email = "";
+  bool notificationsEnabled = false; 
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   @override
   void initState() {
     super.initState();
-    _fetchUserInfo(); // Fetch username when widget initializes.
+    _fetchUserInfo(); 
+    _initializeNotifications(); 
   }
+
+  void _initializeNotifications() {
+    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    const initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initializationSettingsIOS = DarwinInitializationSettings();
+    const initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
+
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  // Request permission for notifications
+  Future<void> _requestNotificationPermission() async {
+    final result = await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    if (result != null && result) {
+      setState(() {
+        notificationsEnabled = true;
+      });
+      _showNotification(); // Show notification when permissions are granted
+      print("Notification permission granted.");
+    } else if (result == null) {
+      setState(() {
+        notificationsEnabled = true;
+      });
+      _showNotification(); // Show notification on Android automatically
+      print("Notification permission granted automatically.");
+    }
+  }
+
+  // Show notification after permission is granted
+  Future<void> _showNotification() async {
+    const androidDetails = AndroidNotificationDetails(
+      'channel_id',
+      'General Notifications',
+      channelDescription: 'This channel is for general notifications.',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+
+    const iosDetails = DarwinNotificationDetails();
+    const notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'Notifications',
+      'Notifications are enabled!',
+      notificationDetails,
+    );
+  }
+
 
   Future<void> _fetchUserInfo() async {
     try {
-      // Get the current user ID
       String userId = FirebaseAuth.instance.currentUser!.uid;
-      
-      // Fetch user document from Firestore
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
           .get();
-      
-      // Check if document exists and extract username
+
       if (userDoc.exists) {
         setState(() {
-          username = userDoc['username']; // Assuming 'username' field is present in Firestore.
+          username = userDoc['username'];
           bio = userDoc['bio'];
           email = userDoc['email'];
         });
       }
     } catch (e) {
-      print("Error fetching: $e");
+      print("Error fetching user info: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Access the theme provider to manage the dark/light mode toggle.
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white, // Sets background color of the app bar to white.
-        elevation: 0, // Removes app bar shadow.
-        centerTitle: true, // Centers the title in the app bar.
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
         title: const Text(
           'Profile',
           style: TextStyle(
-            color: Colors.black, // Sets title text color to black.
+            color: Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 24,
           ),
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0), // Adds padding around the content.
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, // Aligns items to the start of the column.
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 CircleAvatar(
-                  radius: 30, // Sets avatar size.
+                  radius: 30,
                   backgroundColor: const Color.fromARGB(255, 227, 175, 236),
-                  backgroundImage: AssetImage(''), // Placeholder for profile image.
+                  backgroundImage: AssetImage(''),
                 ),
-                const SizedBox(width: 16), // Adds space between avatar and text.
+                const SizedBox(width: 16),
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.start, // Aligns text to the start.
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      username, // Displaying the username from Firestore.
+                      username,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                     Text(
-                      email, // Email displayed in profile from firebase .
+                    Text(
+                      email,
                       style: TextStyle(color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black54, fontWeight: FontWeight.bold),
+                          ? Colors.white
+                          : Colors.black54, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
               ],
             ),
-            const SizedBox(height: 16), // Adds space after profile section.
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
-                // Navigates to EditProfileScreen when button is pressed.
-               final result = await Navigator.push(
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => EditProfileScreen(
-                    username:username,
-                    email: email,
-                    bio: bio
-                  )
-                  
-                  ),
+                      username: username,
+                      email: email,
+                      bio: bio
+                  )),
                 );
                 if (result != null) {
-                    setState(() {
-                  username = result['username'];
-                  bio = result['bio'];
-                    }
-                    );
+                  setState(() {
+                    username = result['username'];
+                    bio = result['bio'];
+                  });
                 }
-                
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple, // Sets button color to purple.
-                minimumSize: const Size(double.infinity, 50), // Button spans full width.
+                backgroundColor: Colors.purple,
+                minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8), // Adds rounded corners to button.
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
               child: const Text(
-                'Edit Profile', // Button text.
+                'Edit Profile',
                 style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
               ),
             ),
-            const SizedBox(height: 24), // Adds space before additional info section.
+            const SizedBox(height: 24),
             const Text(
-              'Additional Info', // Header for additional information section.
+              'Additional Info',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8), // Space below header.
+            const SizedBox(height: 8),
             RichText(
-              text:  TextSpan(
+              text: TextSpan(
                 style: TextStyle(fontSize: 16, color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : Colors.black,),
+                    ? Colors.white
+                    : Colors.black),
                 children: [
                   TextSpan(
-                    text: 'Location: ', // Label for location information.
+                    text: 'Location: ',
                     style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : Colors.black,),
+                        ? Colors.white
+                        : Colors.black),
                   ),
                   TextSpan(
-                    text: 'Oshawa, ON', // User's location.
+                    text: 'Oshawa, ON',
                     style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : Colors.black,),
+                        ? Colors.white
+                        : Colors.black),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 4), // Space before bio section.
+            const SizedBox(height: 4),
             RichText(
-              text:  TextSpan(
+              text: TextSpan(
                 style: TextStyle(fontSize: 16, color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : Colors.black,),
+                    ? Colors.white
+                    : Colors.black),
                 children: [
                   TextSpan(
-                    text: 'Bio: $bio ' , // Label for bio information.
+                    text: 'Bio: $bio ',
                     style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : Colors.black,),
-                  ),
-                  TextSpan(
-                    //text: 'bio: $bio', // User's bio.
-                    style: TextStyle(fontWeight: FontWeight.normal, color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : Colors.black,),
+                        ? Colors.white
+                        : Colors.black),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24), // Space before preferences section.
+            const SizedBox(height: 24),
             const Text(
-              'Preferences', // Header for preferences section.
+              'Preferences',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8), // Space below header.
+            const SizedBox(height: 8),
             SwitchListTile(
               title: const Text(
-                'Receive notifications', // Option to enable/disable notifications.
+                'Receive notifications',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              value: false, // Initial value for notifications switch.
-              onChanged: (bool value) {/*value = !value;*/}, // Placeholder function for handling switch state. Please implement @sahil or @rija
-            ),
-            SwitchListTile(
-              title: const Text(
-                'Dark mode', // Option to enable/disable dark mode.
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              value: themeProvider.isDarkMode, // Bind switch value to theme provider's state.
+              value: notificationsEnabled,
               onChanged: (bool value) {
-                // Toggles dark mode when switch is changed.
+                setState(() {
+                  notificationsEnabled = value;
+                });
+                if (value) {
+                  _requestNotificationPermission();
+                }
+              },
+            ),
+            SwitchListTile(
+              title: const Text(
+                'Dark mode',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              value: themeProvider.isDarkMode,
+              onChanged: (bool value) {
                 themeProvider.toggleTheme(value);
               },
             ),

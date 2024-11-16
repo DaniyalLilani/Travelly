@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:io';  
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -12,14 +12,17 @@ import 'package:provider/provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
 import '../../widgets/travelly_logo.dart';
-
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 
 void main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  initializeNotifications();
+
 
   runApp(
     ChangeNotifierProvider(
@@ -28,6 +31,38 @@ void main() async {
     ),
   );
 }
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+void initializeNotifications() async {
+  // Initialize the plugin for Android and iOS
+  const AndroidInitializationSettings androidInitializationSettings =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const InitializationSettings initializationSettings =
+      InitializationSettings(android: androidInitializationSettings);
+
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+  // Create a notification channel for Android 8.0+
+  if (Platform.isAndroid) {
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'default_channel', // ID of the channel
+      'Default Channel', // Name of the channel
+      description: 'This is the default notification channel.',
+      importance: Importance.high, // High priority for the notification
+      playSound: true,
+    );
+
+    // Create the channel (required for Android 8.0 and above)
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+  }
+}
+
 
 class MyApp extends StatelessWidget {
   @override
