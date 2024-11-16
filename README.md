@@ -1,4 +1,4 @@
-# Welcome to Tavelly!
+# Welcome to Travelly!
 
 ## Project Overview:
 
