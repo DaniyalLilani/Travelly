@@ -3,7 +3,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:travelly/maps/create_pin.dart';
 import 'map_view.dart';
+import 'create_pin.dart';
 
 
 
@@ -72,6 +74,16 @@ class _MyHomePageState extends State<MyHomePage> {
             label: 'Atlas',
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(context, 
+          MaterialPageRoute(builder: (context) => const CreatePin())
+          );
+        },
+        child: const Icon(Icons.add),
+        tooltip: 'Add new pin',
+
       ),
     );
   }
