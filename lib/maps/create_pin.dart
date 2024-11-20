@@ -17,6 +17,8 @@ class _CreatePinState extends State<CreatePin> {
   final TextEditingController _latitudeController = TextEditingController();
   final TextEditingController _longitudeController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+
   String _coordinatesResult = "";
 
 
@@ -37,7 +39,7 @@ class _CreatePinState extends State<CreatePin> {
       if (userDoc.exists) {
         setState(() {
           username = userDoc['username'] ?? ''; 
-          userId = userDoc['userID'] ?? '';
+          userId = uid;
         });
       }
     } catch (e) {
@@ -109,9 +111,17 @@ class _CreatePinState extends State<CreatePin> {
       _longitudeController.text = myPositon.longitude.toString();
       _coordinatesResult = "Current location found!";
     });
+  }
 
-
-
+  Future<void> _createPin() async {
+    await FirebaseFirestore.instance.collection('pins').doc().set({
+        'latitude': _latitudeController.text.trim(),
+        'longitude': _longitudeController.text.trim(),
+        'userID': FirebaseFirestore.instance.collection('users').doc(userId), // check as this make take a little more since we want to create this as a reference in Firebase
+        'username': username, // for simplicity
+        'description': _descriptionController.text.trim(),
+        'timestamp': Timestamp.now()
+    });
   }
 
 
@@ -137,7 +147,7 @@ class _CreatePinState extends State<CreatePin> {
             const SizedBox(height: 20),
             TextField(
               controller: _addressController,
-              keyboardType: TextInputType.number,
+              keyboardType: TextInputType.text,
               decoration: const InputDecoration(labelText: 'Enter Address'),
 
             ), ElevatedButton(
@@ -167,12 +177,38 @@ class _CreatePinState extends State<CreatePin> {
 
 
             TextField(
-              decoration: const InputDecoration(labelText: 'Description'),
+              controller: _descriptionController,
+              decoration: const InputDecoration(labelText: 'Enter a description'),
+              keyboardType: TextInputType.text,
+            ),
+
+            TextField(
+              decoration: const InputDecoration(labelText: 'Add pin'),
+
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                // Logic to save the pin goes here
+              onPressed : () async {
+                try {
+                // Step 1: push to firebase
+                  await _createPin();
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Pin saved successfully!')) // Will need to improve UI here
+                );
+
+                // Step 2: reload all pins from firebase on the maps_view page
+
+                
+
+                } catch(e){
+                  ScaffoldMessenger.of(context).showSnackBar(
+                     SnackBar(content: Text('Failed to save pin: $e'))
+                  );
+
+                }
+              
+                
               },
               child: const Text('Save Pin'),
             ),

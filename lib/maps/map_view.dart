@@ -19,7 +19,7 @@ class MapView extends StatelessWidget {
   Widget build(BuildContext context) {
     return FlutterMap(
       options: const MapOptions(
-        initialCenter: LatLng(51.509364, -0.128928), // London
+        initialCenter: LatLng(43.887501, -79.428406), // Richmond Hill (hehe)
         initialZoom: 4,
         maxZoom: 15,
       ),
