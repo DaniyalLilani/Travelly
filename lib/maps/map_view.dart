@@ -1,5 +1,6 @@
 // https://www.thunderforest.com/tutorials/flutter/
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -15,8 +16,68 @@ class MapView extends StatelessWidget {
 
   final String thunderforestApiKey;
 
+
+  Future<List<Marker>> _getPins(BuildContext context) async {
+    List<Marker> pins = [];
+    try{
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('pins').get();
+          for(var doc in snapshot.docs){
+          var data = doc.data() as Map<String, dynamic>;
+
+          double latitude = double.parse(data['latitude']);
+          double longitude = double.parse(data['longitude']);
+          String username = data['username'] ?? 'Unknown';
+          String description = data['description'] ?? 'No description';
+          
+          pins.add(
+            Marker(
+              point: LatLng(latitude, longitude),
+              width: 40,
+              height: 40,
+              //child: const Icon(Icons.location_pin, color: Colors.red),
+
+              child: GestureDetector(
+                onTap: () {
+                  showDialog(
+                  context: context, 
+                  builder: (context)=> AlertDialog(
+                    title: Text(username),
+                    content: Text(description),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.of(context).pop(), 
+                      child: const Text('Close'),
+                      ),
+                    ],
+                  )
+                  );
+                },
+                  child: const Icon(Icons.location_pin, color: Colors.red),
+
+              )
+            )
+          );
+          
+
+          }
+    } catch(e){
+      print('Error fetching markers: $e');
+
+    }
+    return pins;
+  }
+
   @override
   Widget build(BuildContext context) {
+
+
+  /*1. Fetch Pins from Firestore: Retrieve pin data from the pins collection in Firestore. Each pin should include the latitude, longitude, username, and description.
+
+    Create Markers Dynamically: Use the fetched data to create markers dynamically on the map.
+
+    Show Pin Details on Tap: When a user clicks a marker, display a dialog with details like username and description. */
+
+
     return FlutterMap(
       options: const MapOptions(
         initialCenter: LatLng(43.887501, -79.428406), // Richmond Hill (hehe)
