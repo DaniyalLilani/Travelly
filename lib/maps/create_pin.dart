@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart'; 
-
+import 'map_view.dart';
 class CreatePin extends StatefulWidget {
   const CreatePin({Key? key}) : super(key: key);
 
@@ -198,6 +198,8 @@ class _CreatePinState extends State<CreatePin> {
                 );
 
                 // Step 2: reload all pins from firebase on the maps_view page
+                  Navigator.pop(context, true);
+
 
                 
 
@@ -211,6 +213,7 @@ class _CreatePinState extends State<CreatePin> {
                 
               },
               child: const Text('Save Pin'),
+              
             ),
           ],
         ),
