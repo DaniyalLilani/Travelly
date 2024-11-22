@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart'; 
-import 'map_view.dart';
+
 class CreatePin extends StatefulWidget {
   const CreatePin({Key? key}) : super(key: key);
 
