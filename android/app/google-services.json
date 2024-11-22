@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "509045979063",
-    "project_id": "travellyotu",
-    "storage_bucket": "travellyotu.appspot.com"
+    "project_number": "411062694441",
+    "project_id": "tiptip-a9565",
+    "storage_bucket": "tiptip-a9565.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:509045979063:android:85693ce51633023be09a32",
+        "mobilesdk_app_id": "1:411062694441:android:b3927131b1b0c212fba238",
         "android_client_info": {
           "package_name": "com.travelly.app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyB8sSCVUxRyxQS4d_RyrVAlMFu5UbMuuBk"
+          "current_key": "AIzaSyB4DljwnbEjsw2N9uprypeFZD4YMU_hqiE"
         }
       ],
       "services": {
