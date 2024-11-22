@@ -27,6 +27,13 @@ dependencies:
   syncfusion_flutter_charts: ^20.2.45
   table_calendar: ^3.1.2
   flutter_local_notifications: ^18.0.1
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  flutter_dotenv: ^5.2.1
+  flutter_map_marker_cluster: ^1.4.0
+  geocoding: ^3.0.0
+  geolocator: ^13.0.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -36,7 +43,8 @@ flutter:
   uses-material-design: true
 
   # Uncomment and list assets as needed
-  # assets:
+  assets:
+    - .mapkey.env
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

@@ -6,13 +6,16 @@ import 'screens/home_screen.dart';
 import 'screens/budget/budget_screen.dart';
 import 'screens/calendar_screen.dart';
 import 'screens/profile/theme_provider.dart';
-import 'screens/map_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'package:provider/provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
 import '../../widgets/travelly_logo.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'maps/map_view.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+
 
 
 void main() async {
@@ -22,6 +25,8 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   initializeNotifications();
+  await dotenv.load(fileName: '.mapkey.env');
+
 
 
   runApp(
@@ -86,7 +91,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => LoginScreen(),
         '/signup_screen': (context) => SignupScreen(),
-        '/main': (context) => MyHomePage(),
+        '/main': (context) => MyHomePage()
+
       },
 
     );
@@ -109,7 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
     HomeScreen(),        
     BudgetScreen(),
     CalendarScreen(initialDate: DateTime.now(),),
-    MapScreen(),
+    MapView(thunderforestApiKey: dotenv.env['THUNDERFOREST_API_KEY']!),
     ProfileScreen(),
   ];
 
