@@ -54,6 +54,11 @@
             android:name="com.dexterous.flutterlocalnotifications.CHANNEL_ID"
             android:value="default_channel" />
 
+        <meta-data
+             android:name="com.google.firebase.API_KEY"
+                android:value="AIzaSyB8sSCVUxRyxQS4d_RyrVAlMFu5UbMuuBk"/>
+
+
     </application>
 
     <!-- Additional configuration such as <queries> should be placed here -->

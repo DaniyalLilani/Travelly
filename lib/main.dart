@@ -1,5 +1,4 @@
 import 'dart:io';  
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -20,25 +19,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-
-  //if(kIsWeb){
-    //await Firebase.initializeApp(options: FirebaseOptions(apiKey: "AIzaSyBlLxU09oWfNcJcSUmV7H4bRFc5KdOaB24",
-      //  authDomain: "tiptip-a9565.firebaseapp.com",
-        //projectId: "tiptip-a9565",
-        //storageBucket: "tiptip-a9565.firebasestorage.app",
-        //messagingSenderId: "411062694441",
-        //appId: "1:411062694441:web:65907c2ca979f0f8fba238",
-        //measurementId: "G-77SEN8QVST"));
-  //}else{
-
-    //await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  //}
-
 
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
+    name: 'com.travelly.app', // this gets around duplicate firebase name issue
     options: DefaultFirebaseOptions.currentPlatform,
   );
   initializeNotifications();
