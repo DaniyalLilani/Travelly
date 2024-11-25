@@ -14,11 +14,12 @@ android {
 
     // Using Flutter's SDK version variables
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "25.1.8937393"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
@@ -52,4 +53,12 @@ android {
 flutter {
     // The location of your Flutter SDK.
     source = "../.."
+}
+
+dependencies{
+    implementation platform('com.google.firebase:firebase-bom:33.6.0')
+
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.3'
+
+    implementation 'com.google.firebase:firebase-analytics'
 }
