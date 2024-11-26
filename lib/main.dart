@@ -114,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final List<Widget> _pages = [
     HomeScreen(),        
-    BudgetScreen(),
+    BudgetScreen(tripId: '1'),
     CalendarScreen(initialDate: DateTime.now(),),
     MapView(thunderforestApiKey: dotenv.env['THUNDERFOREST_API_KEY']!),
     ProfileScreen(),

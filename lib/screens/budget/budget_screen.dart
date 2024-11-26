@@ -1,221 +1,66 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
-import 'update_budget_screen.dart';
-import 'add_expense_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BudgetScreen extends StatelessWidget {
-   double totalBudget = 1000; 
-   double usedBudget = 700; 
-   List<ExpenseItem> expenses = [
-    ExpenseItem(name: 'Transportation', cost: 350),
-    ExpenseItem(name: 'Accommodation', cost: 250),
-    ExpenseItem(name: 'Food', cost: 100),
-  ];
+  final String tripId; // Assuming each budget is linked to a trip ID.
+
+  BudgetScreen({required this.tripId});
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    double remainingBudget = totalBudget - usedBudget;
-    double remainingPercentage = (remainingBudget / totalBudget) * 100;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Budget'),
+      ),
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('budgets')
+            .doc(tripId)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-           Text(
-            'Budget',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: isDarkMode ? Colors.white : Colors.black,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: SizedBox(
-              height: 200,
-              child: SfCircularChart(
-                series: <CircularSeries>[
-                  DoughnutSeries<ChartData, String>(
-                    dataSource: [
-                      ChartData('Used', usedBudget, isDarkMode ? Colors.white : Colors.black),
-                      ChartData('Remaining', remainingBudget, Colors.purple), 
-                    ],
-                    xValueMapper: (ChartData data, _) => data.label,
-                    yValueMapper: (ChartData data, _) => data.value,
-                    pointColorMapper: (ChartData data, _) => data.color,
-                    innerRadius: '80%',
-                    startAngle: 180, 
-                    endAngle: 540, 
-                  ),
-                ],
-                annotations: <CircularChartAnnotation>[
-                  CircularChartAnnotation(
-                    widget: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Remaining',
-                          style: TextStyle(
-                            color: isDarkMode ? Colors.white70 : Colors.black54,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          '${remainingPercentage.toStringAsFixed(0)}%',
-                          style: TextStyle(
-                            color: Colors.purple,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'You have \$${remainingBudget.toStringAsFixed(0)} remaining out of your budget.',
-            style: TextStyle(fontSize: 16, color: isDarkMode ? Colors.white70 : Colors.black54,),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
+          if (!snapshot.hasData || !snapshot.data!.exists) {
+            return Center(child: Text('No budget data found.'));
+          }
+
+          final budgetData = snapshot.data!.data() as Map<String, dynamic>;
+          final expenses = budgetData['Expenses'] as List<dynamic>? ?? [];
+
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children:  [
-                  Text(
-                    'Start',
-                    style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
-                  ),
-                  Text(
-                    'Tue, Oct 15',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                children: [
+                  Text('Total Budget: \$${budgetData['totalBudget']}',
+                      style: TextStyle(fontSize: 18)),
+                  Text('Total Spent: \$${budgetData['totalSpent']}',
+                      style: TextStyle(fontSize: 18)),
+                  Text('Total Left: \$${budgetData['totalLeft']}',
+                      style: TextStyle(fontSize: 18)),
+                  SizedBox(height: 16),
+                  Text('Expenses:', style: TextStyle(fontSize: 20)),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: expenses.length,
+                    itemBuilder: (context, index) {
+                      final expense = expenses[index];
+                      return ListTile(
+                        title: Text(expense['expenseName']),
+                        trailing: Text('\$${expense['cost']}'),
+                      );
+                    },
                   ),
                 ],
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children:  [
-                  Text(
-                    'End',
-                    style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
-                  ),
-                  Text(
-                    'Thurs, Oct 31',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Overall Budget',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,color: isDarkMode ? Colors.white : Colors.black,),
-          ),
-          Text(
-            '\$${totalBudget.toStringAsFixed(0)}',
-            style:  TextStyle(fontSize: 24, color: isDarkMode ? Colors.white : Colors.black,),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => UpdateBudgetScreen(),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white // White background in dark mode
-              : Colors.black,
-              foregroundColor: Theme.of(context).brightness == Brightness.dark
-              ? Colors.black // Black text in dark mode
-              : Colors.white,
-              minimumSize: const Size(double.infinity, 50), 
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
             ),
-            child: const Text('Update Budget'),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Expenses',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black,),
-          ),
-          const SizedBox(height: 8),
-          // List of Expenses
-          Column(
-            children: expenses.map((expense) {
-              return ListTile(
-                title: Text(
-                  expense.name,
-                  style:  TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black,),
-                ),
-                subtitle: Text('\$${expense.cost}'),
-                trailing: IconButton(
-                  icon: Icon(Icons.delete, color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white 
-                : Colors.black, 
-                ),
-                  onPressed: () {
-                  },
-                ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AddExpenseScreen(),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white
-              : Colors.black,
-              foregroundColor: Theme.of(context).brightness == Brightness.dark
-              ? Colors.black
-              : Colors.white,
-              minimumSize: const Size(double.infinity, 50), 
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Add New Expense'),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
-}
-
-// Helper class to represent data for the pie chart
-class ChartData {
-  final String label;
-  final double value;
-  final Color color;
-
-  ChartData(this.label, this.value, this.color);
-}
-
-// Helper class to represent an expense item
-class ExpenseItem {
-  final String name;
-  final double cost;
-
-  ExpenseItem({required this.name, required this.cost});
 }
