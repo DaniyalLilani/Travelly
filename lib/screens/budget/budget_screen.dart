@@ -22,14 +22,32 @@ class _BudgetScreenState extends State<BudgetScreen> {
   Future<void> _fetchTripId() async {
     try {
       String userId = FirebaseAuth.instance.currentUser!.uid;
+
+      // Check for existing trips
       QuerySnapshot userTrips = await FirebaseFirestore.instance
           .collection('trips')
           .where('user', isEqualTo: FirebaseFirestore.instance.collection('users').doc(userId))
           .get();
 
       if (userTrips.docs.isNotEmpty) {
+        // If a trip exists, use its ID
         setState(() {
           tripId = userTrips.docs.first.id;
+        });
+      } else {
+        // If no trip exists, create a new trip
+        DocumentReference newTrip = await FirebaseFirestore.instance.collection('trips').add({
+          'user': FirebaseFirestore.instance.collection('users').doc(userId),
+          'totalBudget': 0.0,
+          'totalSpent': 0.0,
+          'totalLeft': 0.0,
+          'expenses': [],
+          'startDate': null,
+          'endDate': null,
+        });
+
+        setState(() {
+          tripId = newTrip.id;
         });
       }
     } catch (e) {
@@ -77,7 +95,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Budget Title
                       const Text(
                         'Budget',
                         style: TextStyle(
@@ -193,7 +210,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (_) => UpdateBudgetScreen(
-                              tripId: tripId,
+                              tripId: tripId!,
                               totalBudget: totalBudget,
                             ),
                           ),
