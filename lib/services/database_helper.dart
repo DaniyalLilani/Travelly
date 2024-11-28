@@ -18,38 +18,55 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'app_database.db');
+    String path = join(await getDatabasesPath(), 'settings_database.db');
     return await openDatabase(
       path,
       version: 1,
       onCreate: (db, version) async {
+        // Create a table for dark mode setting
         await db.execute(
           '''
-          CREATE TABLE comments(
-            id INTEGER PRIMARY KEY, 
-            pinId INTEGER, 
-            username TEXT, 
-            handle TEXT, 
-            comment TEXT, 
-            image TEXT
+          CREATE TABLE settings(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            isDarkMode INTEGER
           )
           ''',
+        );
+
+        // Insert default value for isDarkMode (0 = false)
+        await db.insert(
+          'settings',
+          {'isDarkMode': 0},
         );
       },
     );
   }
 
-  // Insert comment with the specified pinId
-  Future<void> insertComment(Map<String, dynamic> comment, int pinId) async {
+  // Get the current isDarkMode value
+  Future<bool> getIsDarkMode() async {
     final db = await database;
-    // Add pinId to the comment before insertion
-    comment['pinId'] = pinId.toString();
-    await db.insert('comments', comment);
+    final List<Map<String, dynamic>> result = await db.query(
+      'settings',
+      columns: ['isDarkMode'],
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) {
+      return result.first['isDarkMode'] == 1;
+    } else {
+      // Default to false if no entry exists
+      return false;
+    }
   }
 
-  // Fetch comments associated with a specific pinId
-  Future<List<Map<String, dynamic>>> fetchComments(int pinId) async {
+  // Update the isDarkMode value
+  Future<void> setIsDarkMode(bool isDarkMode) async {
     final db = await database;
-    return await db.query('comments', where: 'pinId = ?', whereArgs: [pinId]);
+    await db.update(
+      'settings',
+      {'isDarkMode': isDarkMode ? 1 : 0},
+      where: 'id = ?',
+      whereArgs: [1], // Always update the first row
+    );
   }
 }

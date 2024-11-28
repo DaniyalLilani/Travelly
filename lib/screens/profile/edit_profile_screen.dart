@@ -6,11 +6,13 @@ class EditProfileScreen extends StatefulWidget {
   final String username;
   final String email;
   final String bio;
+  final String location;
 
   EditProfileScreen({
     required this.username,
     required this.email,
     required this.bio,
+    required this.location
   });
 
   @override
@@ -21,6 +23,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _nameController;
   late TextEditingController _emailController;
   late TextEditingController _bioController;
+  late TextEditingController _locationController;
 
   @override
   void initState() {
@@ -28,6 +31,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _nameController = TextEditingController(text: widget.username);
     _emailController = TextEditingController(text: widget.email);
     _bioController = TextEditingController(text: widget.bio);
+    _locationController = TextEditingController(text: widget.location);
   }
 
   @override
@@ -46,6 +50,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       await FirebaseFirestore.instance.collection('users').doc(userId).update({
         'username': _nameController.text,
         'bio': _bioController.text,
+        'location': _locationController.text
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Profile has been successfully updated!')),
@@ -53,6 +58,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       Navigator.pop(context, {
       'username': _nameController.text,
       'bio': _bioController.text,
+      'location': _locationController.text
+
     });
 
 
@@ -117,6 +124,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               decoration: InputDecoration(
                 labelText: 'Bio',
                 hintText: 'Enter your bio',
+                filled: true,
+                fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _locationController,
+              decoration: InputDecoration(
+                labelText: 'Bio',
+                hintText: 'Enter your location',
                 filled: true,
                 fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
                 border: OutlineInputBorder(

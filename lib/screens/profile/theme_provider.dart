@@ -11,4 +11,11 @@ class ThemeProvider with ChangeNotifier {
     _isDarkMode = isOn;
     notifyListeners();
   }
+  void setDarkMode(bool isDarkMode) {
+    _isDarkMode = isDarkMode;
+    notifyListeners();
+  }
+
+
+
 }

@@ -1,23 +1,8 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../services/database_helper.dart'; // Import the SQLite helper class
-
-/************************************** 
-NEXT ITERATION.
-LOAD ALL PINS AND COMMENTS FROM FIREBASE
-PUSH THEM TO FIREBASE
-CACHE RESULTS LOCALLY (which we are doing with local edits right now)
-THIS WILL ALLOW FOR A FUTURE OFFLINE MODE
-FOR TA: In terms of the midpoint checkin, this is our local storage implementation
-
-Firebase ---> SQflite --> User ---> SQflite 
-                           |
-                           |
-                           | ------> Firebase
-***************************************/
-
-
+Legacy code from a previous iteration, we will no longer use this now that we have a thunderforest api key 
 
 class MapScreen extends StatefulWidget {
   @override
@@ -314,3 +299,4 @@ class PinDetailsScreen extends StatelessWidget {
     );
   }
 }
+*/

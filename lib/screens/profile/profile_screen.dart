@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'edit_profile_screen.dart';
 import 'theme_provider.dart';
+import '../../services/database_helper.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -15,7 +16,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String username = ""; 
   String bio = ""; 
   String email = "";
+  String location = "";
   bool notificationsEnabled = false; 
+  final DatabaseHelper _dbHelper = DatabaseHelper();
+
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   @override
@@ -23,6 +27,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _fetchUserInfo(); 
     _initializeNotifications(); 
+    _loadDarkModePreference();
+
   }
 
   void _initializeNotifications() {
@@ -86,6 +92,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Future<void> _loadDarkModePreference() async {
+  bool isDarkMode = await _dbHelper.getIsDarkMode();
+  Provider.of<ThemeProvider>(context, listen: false).setDarkMode(isDarkMode);
+}
+
+
 
   Future<void> _fetchUserInfo() async {
     try {
@@ -100,6 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           username = userDoc['username'];
           bio = userDoc['bio'];
           email = userDoc['email'];
+          location = userDoc['location'];
         });
       }
     } catch (e) {
@@ -135,7 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 CircleAvatar(
                   radius: 30,
                   backgroundColor: const Color.fromARGB(255, 227, 175, 236),
-                  backgroundImage: AssetImage(''),
+                  backgroundImage: AssetImage('lib/assets/Default_pfp.jpg'),
                 ),
                 const SizedBox(width: 16),
                 Column(
@@ -166,13 +179,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   MaterialPageRoute(builder: (context) => EditProfileScreen(
                       username: username,
                       email: email,
-                      bio: bio
+                      bio: bio,
+                      location: location,
                   )),
                 );
                 if (result != null) {
                   setState(() {
                     username = result['username'];
                     bio = result['bio'];
+                    location = result['location'];
                   });
                 }
               },
@@ -197,6 +212,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 8),
+            
+            RichText(
+              text: TextSpan(
+                style: TextStyle(fontSize: 16, color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black),
+                children: [
+                  TextSpan(
+                    text: 'Bio: $bio ',
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+
             RichText(
               text: TextSpan(
                 style: TextStyle(fontSize: 16, color: Theme.of(context).brightness == Brightness.dark
@@ -210,23 +243,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         : Colors.black),
                   ),
                   TextSpan(
-                    text: 'Oshawa, ON',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white
-                        : Colors.black),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 4),
-            RichText(
-              text: TextSpan(
-                style: TextStyle(fontSize: 16, color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : Colors.black),
-                children: [
-                  TextSpan(
-                    text: 'Bio: $bio ',
+                    text: location,
                     style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).brightness == Brightness.dark
                         ? Colors.white
                         : Colors.black),
@@ -268,8 +285,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               value: themeProvider.isDarkMode,
-              onChanged: (bool value) {
+              onChanged: (bool value) async {
                 themeProvider.toggleTheme(value);
+                await _dbHelper.setIsDarkMode(value); // push to local db
               },
             ),
           ],

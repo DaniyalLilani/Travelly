@@ -14,6 +14,7 @@ import '../../widgets/travelly_logo.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'maps/map_view.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'services/database_helper.dart';
 
 
 
@@ -21,6 +22,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(
     name: 'com.travelly.app', // this gets around duplicate firebase name issue
     options: DefaultFirebaseOptions.currentPlatform,
@@ -28,15 +30,38 @@ void main() async {
   initializeNotifications();
   await dotenv.load(fileName: '.mapkey.env');
 
+  
+  final themeProvider = ThemeProvider();
+  final isDarkMode = await _loadDarkModePreference();
+  themeProvider.setDarkMode(isDarkMode); // Initialize the ThemeProvider with the value
+
+
 
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
+    ChangeNotifierProvider<ThemeProvider>.value(
+      value: themeProvider, // Pass the initialized ThemeProvider instance
       child: MyApp(),
     ),
   );
 }
+
+
+
+Future<bool> _loadDarkModePreference() async {
+  final db = await DatabaseHelper().database;
+  final result = await db.query(
+    'settings',
+    columns: ['isDarkMode'],
+    limit: 1,
+  );
+
+  if (result.isNotEmpty) {
+    return result.first['isDarkMode'] == 1; // Check if the value is true (1 in SQLite)
+  }
+  return false; // Default to light mode if no preference is stored
+}
+
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -68,6 +93,10 @@ void initializeNotifications() async {
         ?.createNotificationChannel(channel);
   }
 }
+  final DatabaseHelper _dbHelper = DatabaseHelper();
+
+
+
 
 
 class MyApp extends StatelessWidget {

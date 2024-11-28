@@ -31,9 +31,8 @@ class _SignupScreenState extends State<SignupScreen> {
         'userID': user?.uid,
         'username': usernameController.text.trim(),
         'password': passwordController.text.trim(),
-        'bio': ""
-        
-
+        'bio': "",
+        'location': "Location not set"
         // Add other user fields if necessary
       });
 
@@ -92,6 +91,20 @@ class _SignupScreenState extends State<SignupScreen> {
               controller: emailController,
               decoration: InputDecoration(
                 hintText: 'Enter your email',
+                filled: true,
+                fillColor: Colors.grey[200],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              keyboardType: TextInputType.emailAddress,
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: usernameController,
+              decoration: InputDecoration(
+                hintText: 'Enter your username',
                 filled: true,
                 fillColor: Colors.grey[200],
                 border: OutlineInputBorder(
