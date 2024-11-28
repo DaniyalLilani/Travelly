@@ -1,94 +1,131 @@
 import 'package:flutter/material.dart';
 
 class AddExpenseScreen extends StatelessWidget {
+  final void Function(String name, double cost) onAdd;
+
+  AddExpenseScreen({required this.onAdd});
+
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _costController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Expense'),
-        backgroundColor: isDarkMode ? Colors.black : Colors.white,
-        foregroundColor:isDarkMode ? Colors.white : Colors.black,
+        backgroundColor: Colors.white,
         elevation: 0,
+        foregroundColor: Colors.black,
+        title: const Text(
+          "Add Expense",
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Name',
-                labelStyle: TextStyle(
-                  color: isDarkMode ? Colors.white : Colors.black,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Name',
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                ),
-                hintText: 'Enter the expense name',
-                hintStyle: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54,),
-                filled: true,
-                fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
+                  fontSize: 16,
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Cost',
-                labelStyle: TextStyle(
-                  color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+              const SizedBox(height: 8),
+              TextField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  hintText: 'Enter expense',
+                  hintStyle: TextStyle(
+                    color: const Color.fromARGB(255, 121, 117, 117),
+                    fontWeight: FontWeight.bold,
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Cost',
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                ),
-                hintText: 'Enter the cost',
-                hintStyle: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
-                filled: true,
-                fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
+                  fontSize: 16,
                 ),
               ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context); 
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
-                foregroundColor: Colors.white, 
-                minimumSize: const Size(double.infinity, 50), 
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _costController,
+                decoration: InputDecoration(
+                  hintText: 'Enter cost',
+                  hintStyle: TextStyle(
+                    color: const Color.fromARGB(255, 121, 117, 117),
+                    fontWeight: FontWeight.bold,
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  final name = _nameController.text;
+                  final cost = double.tryParse(_costController.text) ?? 0.0;
+                  if (name.isNotEmpty && cost > 0) {
+                    onAdd(name, cost);
+                    Navigator.pop(context);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Add',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-              child: const Text(
-                'Add',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context); 
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isDarkMode ? Colors.white : Colors.grey[200],
-                foregroundColor: isDarkMode ? Colors.black : Colors.black, 
-                minimumSize: const Size(double.infinity, 50), 
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
