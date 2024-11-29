@@ -12,7 +12,7 @@ class EditProfileScreen extends StatefulWidget {
     required this.username,
     required this.email,
     required this.bio,
-    required this.location
+    required this.location,
   });
 
   @override
@@ -21,7 +21,6 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _nameController;
-  late TextEditingController _emailController;
   late TextEditingController _bioController;
   late TextEditingController _locationController;
 
@@ -29,52 +28,52 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.username);
-    _emailController = TextEditingController(text: widget.email);
     _bioController = TextEditingController(text: widget.bio);
-    _locationController = TextEditingController(text: widget.location);
+
+    // If the location is "Location not set", keep the text field empty
+    _locationController = TextEditingController(
+      text: widget.location == "Location not set" ? "" : widget.location,
+    );
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _emailController.dispose();
     _bioController.dispose();
+    _locationController.dispose();
     super.dispose();
   }
 
-  Future<void> _updateUser() async{
-    try{
-      print("Inside update user");
+  Future<void> _updateUser() async {
+    try {
       String userId = FirebaseAuth.instance.currentUser!.uid;
-      
+
       await FirebaseFirestore.instance.collection('users').doc(userId).update({
         'username': _nameController.text,
         'bio': _bioController.text,
-        'location': _locationController.text
+        'location': _locationController.text,
       });
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Profile has been successfully updated!')),
+        const SnackBar(content: Text('Profile has been successfully updated!')),
       );
+
       Navigator.pop(context, {
-      'username': _nameController.text,
-      'bio': _bioController.text,
-      'location': _locationController.text
-
-    });
-
-
-
-
-    } catch(error){
+        'username': _nameController.text,
+        'bio': _bioController.text,
+        'location': _locationController.text,
+      });
+    } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating profile: $error')),
+        SnackBar(content: Text('Error updating profile: $error')),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -90,44 +89,43 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Text(
+              'Edit Your Profile',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 24),
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
-                labelText: 'Name',
                 hintText: 'Enter your name',
+                hintStyle: const TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
                 filled: true,
-                fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                fillColor: Colors.grey[200],
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
               ),
             ),
             const SizedBox(height: 16),
-            /*TextField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                hintText: 'Enter your email',
-                filled: true,
-                fillColor: Colors.grey[200],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ), we cannot allow a user to change their email so simply, this will really mess up the firebase Auth
-            */
-            const SizedBox(height: 16),
             TextField(
               controller: _bioController,
               decoration: InputDecoration(
-                labelText: 'Bio',
                 hintText: 'Enter your bio',
+                hintStyle: const TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
                 filled: true,
-                fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                fillColor: Colors.grey[200],
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -137,47 +135,49 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             TextField(
               controller: _locationController,
               decoration: InputDecoration(
-                labelText: 'Bio',
                 hintText: 'Enter your location',
+                hintStyle: const TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
                 filled: true,
-                fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                fillColor: Colors.grey[200],
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
               ),
-              maxLines: 3,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             ElevatedButton(
               onPressed: _updateUser,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.purple,
+                foregroundColor: Colors.white,
                 minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
               child: const Text(
                 'Save Changes',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              onPressed: () => Navigator.pop(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[200],
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
                 minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
               child: const Text(
                 'Cancel',
-                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ],
