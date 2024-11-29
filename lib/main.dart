@@ -162,6 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        automaticallyImplyLeading: false, 
         title: TravellyLogo(),
       ),
       body: _pages[_currentIndex],
