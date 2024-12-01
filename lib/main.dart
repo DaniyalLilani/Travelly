@@ -1,4 +1,5 @@
 import 'dart:io';  
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -141,10 +142,33 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
+  late String _userId; // Fetch and store the user ID from your auth system.
+
+  @override
+  void initState() {
+    super.initState();
+    // Replace with your logic to fetch the user ID, such as from FirebaseAuth
+    _fetchUserId();;
+  }
+
+  Future<void> _fetchUserId() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      setState(() {
+        _userId = user?.email ?? user?.uid ?? "guest_user"; // Use email or UID, fallback to guest_user.
+      });
+    } catch (e) {
+      debugPrint("Error fetching user ID: $e");
+      setState(() {
+        _userId = "error_user";
+      });
+    }
+  }
+
+  late final List<Widget> _pages = [
     HomeScreen(),        
     BudgetScreen(),
-    CalendarScreen(initialDate: DateTime.now(),),
+    CalendarScreen(initialDate: DateTime.now(),userId: _userId,),
     MapView(thunderforestApiKey: dotenv.env['THUNDERFOREST_API_KEY']!),
     ProfileScreen(),
   ];
