@@ -1,34 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class HomeScreen extends StatefulWidget {
+  final String userId;
+
+  HomeScreen({required this.userId});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
   TextEditingController _searchController = TextEditingController();
-  List<EventCard> _allEvents = [
-    EventCard(eventName: 'Tokyo Ramen Festa', eventTime: '10 AM - 3 PM, Central Park', onAddToCalendar: () {}),
-    EventCard(eventName: 'Ikebukuro Halloween Festival', eventTime: '4 PM - 7 PM, Olympic Park', onAddToCalendar: () {}),
-    EventCard(eventName: 'Tokyo Sake Festival', eventTime: '9 PM - 12 AM, Central Park', onAddToCalendar: () {}),
-  ]; // A sample list of events
-
-  List<EventCard> _filteredEvents = [];
+  List<Map<String, dynamic>> _allEvents = [];
+  List<Map<String, dynamic>> _filteredEvents = [];
 
   @override
   void initState() {
     super.initState();
-    _filteredEvents = _allEvents; // Initialize with all events
-    _searchController.addListener(_filterEvents);  // Add listener for search input
+    _fetchUpcomingEvents();
+  }
+
+  // Fetch upcoming events from Firebase
+  Future<void> _fetchUpcomingEvents() async {
+    FirebaseFirestore.instance
+        .collection('events')
+        .where('date', isGreaterThanOrEqualTo: DateTime.now().toString()) 
+        .orderBy('date') // Sort by date
+        .limit(5) // Limit to next 5 events
+        .get()
+        .then((snapshot) {
+      setState(() {
+        _allEvents = snapshot.docs.map((doc) {
+          return {
+            'eventName': doc['description'],
+            'eventTime': doc['time'],
+            'eventDate': doc['date'],
+            'eventId': doc.id,
+            'location': doc['location'] ?? 'No location provided',
+          };
+        }).toList();
+        _filteredEvents = _allEvents; // Initialize filtered events
+      });
+    });
   }
 
   // Function to filter events based on search query
-  void _filterEvents() {
-    String query = _searchController.text.toLowerCase();
+  void _filterEvents(String query) {
     setState(() {
       _filteredEvents = _allEvents.where((event) {
-        return event.eventName.toLowerCase().contains(query) ||
-               event.eventTime.toLowerCase().contains(query); // Filters based on event name or time
+        return event['eventName'].toLowerCase().contains(query.toLowerCase()) ||
+            event['eventTime'].toLowerCase().contains(query.toLowerCase());
       }).toList();
     });
   }
@@ -41,20 +64,24 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Local Events',
+            'Upcoming Events',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 16),
+          // Search bar
           TextField(
             controller: _searchController,
+            onChanged: (query) => _filterEvents(query),
             decoration: InputDecoration(
               prefixIcon: Icon(Icons.search),
               hintText: 'Search for events near you',
               filled: true,
-              fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.grey[800] : Colors.grey[200],
+              fillColor: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey[800]
+                  : Colors.grey[200],
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
@@ -62,16 +89,23 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
-            'Upcoming Events',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
+          // Display filtered events
+          for (var event in _filteredEvents)
+            EventCard(
+              eventName: event['eventName'],
+              eventTime: event['eventTime'],
+              onViewDetails: () {
+                // Navigate to EventDetailsScreen with the eventId
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EventDetailsScreen(
+                      eventId: event['eventId'], // Pass eventId
+                    ),
+                  ),
+                );
+              },
             ),
-          ),
-          const SizedBox(height: 16),
-          // Render the filtered events
-          for (var event in _filteredEvents) event,
         ],
       ),
     );
@@ -81,13 +115,13 @@ class _HomeScreenState extends State<HomeScreen> {
 class EventCard extends StatelessWidget {
   final String eventName;
   final String eventTime;
-  final VoidCallback onAddToCalendar;
+  final VoidCallback onViewDetails;
 
   const EventCard({
     Key? key,
     required this.eventName,
     required this.eventTime,
-    required this.onAddToCalendar,
+    required this.onViewDetails,
   }) : super(key: key);
 
   @override
@@ -104,7 +138,7 @@ class EventCard extends StatelessWidget {
         ),
         subtitle: Text(eventTime),
         trailing: ElevatedButton.icon(
-          onPressed: onAddToCalendar,
+          onPressed: onViewDetails,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.black,
             foregroundColor: Colors.white,
@@ -112,10 +146,81 @@ class EventCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          icon: const Icon(Icons.calendar_today),
-          label: const Text('Add to Calendar'),
+          icon: const Icon(Icons.info),
+          label: const Text('View Details'),
         ),
       ),
+    );
+  }
+}
+
+class EventDetailsScreen extends StatelessWidget {
+  final String eventId;
+
+  EventDetailsScreen({required this.eventId});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance
+          .collection('events')
+          .doc(eventId)
+          .get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            appBar: AppBar(title: Text('Event Details')),
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Scaffold(
+            appBar: AppBar(title: Text('Event Details')),
+            body: Center(child: Text('Error: ${snapshot.error}')),
+          );
+        }
+
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return Scaffold(
+            appBar: AppBar(title: Text('Event Details')),
+            body: Center(child: Text('Event not found')),
+          );
+        }
+
+        final eventData = snapshot.data!.data() as Map<String, dynamic>;
+
+        return Scaffold(
+          appBar: AppBar(title: Text('Event Details')),
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  eventData['description'] ?? 'No description',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Time: ${eventData['time']}',
+                  style: TextStyle(fontSize: 18),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Location: ${eventData['location']}',
+                  style: TextStyle(fontSize: 18),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Date: ${eventData['date']}',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
