@@ -57,7 +57,10 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
       body: tripId == null
           ? const Center(child: CircularProgressIndicator())
           : StreamBuilder<DocumentSnapshot>(
@@ -95,11 +98,12 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Budget',
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.black,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -129,12 +133,15 @@ class _BudgetScreenState extends State<BudgetScreen> {
                                     Text(
                                       'Remaining',
                                       style: TextStyle(
-                                          color: Colors.black54, fontSize: 16),
+                                           color: isDarkMode
+                                              ? Colors.white70
+                                              : Colors.black54,
+                                          fontSize: 16),
                                     ),
                                     Text(
                                       '${remainingPercentage.toStringAsFixed(0)}%',
                                       style: TextStyle(
-                                        color: Colors.purple,
+                                        color: isDarkMode ? Colors.purple : Colors.blue,
                                         fontSize: 24,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -149,8 +156,10 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       const SizedBox(height: 16),
                       Text(
                         'You have \$${remainingBudget.toStringAsFixed(0)} remaining out of your budget.',
-                        style:
-                            const TextStyle(fontSize: 16, color: Colors.black54),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: isDarkMode ? Colors.white70 : Colors.black54
+                        ),
                       ),
                       const SizedBox(height: 16),
                       Row(
@@ -159,9 +168,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'Start',
-                                style: TextStyle(color: Colors.black54),
+                                style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
                               ),
                               Text(
                                 startDate != null
@@ -174,9 +183,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'End',
-                                style: TextStyle(color: Colors.black54),
+                                style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
                               ),
                               Text(
                                 endDate != null
@@ -194,14 +203,14 @@ class _BudgetScreenState extends State<BudgetScreen> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                          color: isDarkMode ? Colors.white70 : Colors.black54,
                         ),
                       ),
                       Text(
                         '\$${totalBudget.toStringAsFixed(0)}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 24,
-                          color: Colors.black,
+                          color: isDarkMode ? Colors.white : Colors.black,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -216,7 +225,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
+                          backgroundColor:  Colors.purple,
                           foregroundColor: Colors.white,
                           minimumSize: const Size(double.infinity, 50),
                         ),
@@ -228,7 +237,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                         style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black),
+                            color: isDarkMode ? Colors.white : Colors.black),
                       ),
                       const SizedBox(height: 8),
                       ListView.builder(
@@ -281,7 +290,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
+                          backgroundColor: Colors.purple,
                           foregroundColor: Colors.white,
                           minimumSize: const Size(double.infinity, 50),
                         ),

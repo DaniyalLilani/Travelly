@@ -120,7 +120,9 @@ class _CreatePinState extends State<CreatePin> {
         'userID': FirebaseFirestore.instance.collection('users').doc(userId), // check as this make take a little more since we want to create this as a reference in Firebase
         'username': username, // for simplicity
         'description': _descriptionController.text.trim(),
-        'timestamp': Timestamp.now()
+        'timestamp': Timestamp.now(),
+        'rating': 0,
+        'comments': []
     });
   }
 

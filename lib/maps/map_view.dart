@@ -4,6 +4,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'create_pin.dart';
+import 'post_detail_page.dart';  
+
 
 class MapView extends StatefulWidget {
   const MapView({
@@ -44,21 +46,15 @@ class _MapViewState extends State<MapView> {
           width: 70,
           height: 70, 
           child: GestureDetector(
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text(username),
-                  content: Text(description),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Close'),
-                    ),
-                  ],
-                ),
-              );
-            },
+              onTap: () {
+                // Navigate to PostDetailPage when the marker is tapped
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PostDetailPage(postId: doc.id), // Pass the postId
+                  ),
+                );
+              },
             child: const Icon(Icons.location_pin, color: Colors.purple),
           ),
         ),

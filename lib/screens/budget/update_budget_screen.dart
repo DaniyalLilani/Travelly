@@ -53,8 +53,8 @@ class _UpdateBudgetScreenState extends State<UpdateBudgetScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        foregroundColor: isDarkMode ? Colors.white : Colors.black,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -76,11 +76,11 @@ class _UpdateBudgetScreenState extends State<UpdateBudgetScreen> {
               decoration: InputDecoration(
                 hintText: 'Enter Budget here',
                 hintStyle: TextStyle(
-                  color: const Color.fromARGB(255, 121, 117, 117),
+                  color: isDarkMode ? Colors.white70 : Colors.black54,
                   fontWeight: FontWeight.bold, // Added bold style for the hint text
                 ),
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -95,14 +95,14 @@ class _UpdateBudgetScreenState extends State<UpdateBudgetScreen> {
               decoration: InputDecoration(
                 labelText: 'Start Date',
                 labelStyle: TextStyle(
-                  color: Colors.grey[600],
+                  color: isDarkMode ? Colors.white70 : Colors.black54,
                   fontWeight: FontWeight.bold,
                 ),
                 hintText: 'Enter start date',
-                hintStyle: TextStyle(color: Colors.grey[400]),
+                hintStyle: TextStyle(color: isDarkMode ? Colors.white54 : Colors.black54),
                 prefixIcon: const Icon(Icons.calendar_today, color: Colors.purple),
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -117,14 +117,14 @@ class _UpdateBudgetScreenState extends State<UpdateBudgetScreen> {
               decoration: InputDecoration(
                 labelText: 'End Date',
                 labelStyle: TextStyle(
-                  color: Colors.grey[600],
+                  color: isDarkMode ? Colors.white70 : Colors.black54,
                   fontWeight: FontWeight.bold,
                 ),
                 hintText: 'Enter end date',
-                hintStyle: TextStyle(color: Colors.grey[400]),
+                hintStyle: TextStyle(color: isDarkMode ? Colors.white54 : Colors.black54),
                 prefixIcon: const Icon(Icons.calendar_today, color: Colors.purple),
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
