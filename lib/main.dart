@@ -28,6 +28,7 @@ void main() async {
     name: 'com.travelly.app', // this gets around duplicate firebase name issue
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
   initializeNotifications();
   await dotenv.load(fileName: '.mapkey.env');
 

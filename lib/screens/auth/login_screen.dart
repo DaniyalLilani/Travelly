@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../widgets/travelly_logo.dart';
+import 'package:travelly/main.dart'; // Import main for navigation
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -20,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-      Navigator.of(context).pushReplacementNamed('/main');
+      Navigator.of(context).pushReplacementNamed('/main'); // Navigate to main screen
     } catch (e) {
       print(e);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -39,24 +40,37 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 80),
-              TravellyLogo(isLoginOrSignup: true,), 
-              const SizedBox(height: 32),
+              const SizedBox(height: 60),
+              TravellyLogo(isLoginOrSignup: true), 
+              const SizedBox(height: 20),
+              
+              Center(
+                child: Image.asset(
+                  'login.jpg', 
+                  height: 200,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 20),
               const Text(
                 'Login',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
               TextField(
                 controller: emailController,
                 decoration: InputDecoration(
-                  hintText: 'Enter Your Email',
+                  hintText: "Enter Your Email",
                   filled: true,
                   fillColor: isDarkMode ? Colors.grey[700] : Colors.grey[200],
                   border: OutlineInputBorder(
@@ -66,18 +80,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 keyboardType: TextInputType.emailAddress,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               TextField(
                 controller: passwordController,
                 obscureText: !_isPasswordVisible,
                 decoration: InputDecoration(
-                  hintText: 'Enter your password',
-                  filled: true,
-                  fillColor: isDarkMode ? Colors.grey[700] : Colors.grey[200],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide.none,
-                  ),
+                  hintText: "Enter your password",
                   suffixIcon: IconButton(
                     icon: Icon(
                       _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
@@ -88,6 +96,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         _isPasswordVisible = !_isPasswordVisible;
                       });
                     },
+                  ),
+                  filled: true,
+                  fillColor: isDarkMode ? Colors.grey[700] : Colors.grey[200],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
                   ),
                 ),
                 style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),  // Text color fix for dark mode
@@ -118,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  // Yet to implement Google sign-in logic
+                  // Implement Google Sign-In logic here
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
