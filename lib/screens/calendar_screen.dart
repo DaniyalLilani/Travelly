@@ -25,6 +25,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   final TextEditingController _locationController = TextEditingController();
 
   TimeOfDay _eventTime = TimeOfDay.now();
+  bool _isPublic = false; // Track public/private status for the event
 
   @override
   void initState() {
@@ -49,6 +50,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         'description': doc['description'],
         'time': doc['time'],
         'location': doc['location'] ?? 'No location provided',
+        'isPublic': doc['isPublic'],
       };
     }).toList();
 
@@ -65,7 +67,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
       'description': description,
       'time': time,
       'location': location,
+      'isPublic': _isPublic, // Save public/private status
       'timestamp': Timestamp.now(),
+    });
+
+    _loadEventsForDay(_selectedDay);
+  }
+
+  Future<void> _editEvent(String eventId, String description, String time,
+      String location, bool isPublic) async {
+    await _firestore.collection('events').doc(eventId).update({
+      'description': description,
+      'time': time,
+      'location': location,
+      'isPublic': isPublic,
     });
 
     _loadEventsForDay(_selectedDay);
@@ -92,6 +107,92 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   String _formatDate(DateTime date) {
     return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+  }
+
+  void _showEditDialog(Map<String, dynamic> event) {
+    _activityController.text = event['description'];
+    _timeController.text = event['time'];
+    _locationController.text = event['location'];
+    _isPublic = event['isPublic'];
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text("Edit Event"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _activityController,
+                    decoration: InputDecoration(hintText: "Activity Name"),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _timeController,
+                    decoration: InputDecoration(
+                      hintText: "Select Time",
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.access_time),
+                        onPressed: () => _selectTime(context),
+                      ),
+                    ),
+                    readOnly: true,
+                    onTap: () => _selectTime(context),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _locationController,
+                    decoration: InputDecoration(hintText: "Location (optional)"),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Public Event"),
+                      Switch(
+                        value: _isPublic,
+                        onChanged: (value) {
+                          setState(() {
+                            _isPublic = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_activityController.text.isNotEmpty &&
+                        _timeController.text.isNotEmpty) {
+                      _editEvent(
+                        event['id'],
+                        _activityController.text,
+                        _timeController.text,
+                        _locationController.text.isNotEmpty
+                            ? _locationController.text
+                            : 'No location provided',
+                        _isPublic,
+                      );
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Text("Save"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -146,9 +247,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       title: Text(event['description']),
                       subtitle: Text(
                           "${event['time']} at ${event['location']}"),
-                      trailing: IconButton(
-                        icon: Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => _deleteEvent(event['id']),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _showEditDialog(event),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _deleteEvent(event['id']),
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -163,61 +273,81 @@ class _CalendarScreenState extends State<CalendarScreen> {
           _activityController.clear();
           _timeController.clear();
           _locationController.clear();
+          _isPublic = false; // Reset the public/private switch
 
           showDialog(
             context: context,
             builder: (context) {
-              return AlertDialog(
-                title: Text("Add Event"),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: _activityController,
-                      decoration: InputDecoration(hintText: "Activity Name"),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _timeController,
-                      decoration: InputDecoration(
-                        hintText: "Select Time",
-                        suffixIcon: IconButton(
-                          icon: Icon(Icons.access_time),
-                          onPressed: () => _selectTime(context),
+              return StatefulBuilder(
+                builder: (context, setState) {
+                  return AlertDialog(
+                    title: Text("Add Event"),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          controller: _activityController,
+                          decoration: InputDecoration(hintText: "Activity Name"),
                         ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _timeController,
+                          decoration: InputDecoration(
+                            hintText: "Select Time",
+                            suffixIcon: IconButton(
+                              icon: Icon(Icons.access_time),
+                              onPressed: () => _selectTime(context),
+                            ),
+                          ),
+                          readOnly: true,
+                          onTap: () => _selectTime(context),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _locationController,
+                          decoration: InputDecoration(hintText: "Location (optional)"),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("Public Event"),
+                            Switch(
+                              value: _isPublic,
+                              onChanged: (value) {
+                                setState(() {
+                                  _isPublic = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text("Cancel"),
                       ),
-                      readOnly: true,
-                      onTap: () => _selectTime(context),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _locationController,
-                      decoration: InputDecoration(hintText: "Location (optional)"),
-                    ),
-                  ],
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text("Cancel"),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_activityController.text.isNotEmpty &&
-                          _timeController.text.isNotEmpty) {
-                        _addEventToFirestore(
-                          _activityController.text,
-                          _timeController.text,
-                          _locationController.text.isNotEmpty
-                              ? _locationController.text
-                              : 'No location provided',
-                        );
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: Text("Save"),
-                  ),
-                ],
+                      ElevatedButton(
+                        onPressed: () {
+                          if (_activityController.text.isNotEmpty &&
+                              _timeController.text.isNotEmpty) {
+                            _addEventToFirestore(
+                              _activityController.text,
+                              _timeController.text,
+                              _locationController.text.isNotEmpty
+                                  ? _locationController.text
+                                  : 'No location provided',
+                            );
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: Text("Save"),
+                      ),
+                    ],
+                  );
+                },
               );
             },
           );

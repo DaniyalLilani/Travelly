@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
 class HomeScreen extends StatefulWidget {
   final String userId;
 
@@ -26,7 +25,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _fetchUpcomingEvents() async {
     FirebaseFirestore.instance
         .collection('events')
-        .where('date', isGreaterThanOrEqualTo: DateTime.now().toString()) 
+        .where('date', isGreaterThanOrEqualTo: DateTime.now().toString())
+        .where('isPublic', isEqualTo: true) // Fetch only public events
         .orderBy('date') // Sort by date
         .limit(5) // Limit to next 5 events
         .get()
@@ -162,10 +162,7 @@ class EventDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance
-          .collection('events')
-          .doc(eventId)
-          .get(),
+      future: FirebaseFirestore.instance.collection('events').doc(eventId).get(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
