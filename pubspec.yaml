@@ -44,7 +44,9 @@ flutter:
 
   # Uncomment and list assets as needed
   assets:
+  
     - .mapkey.env
+
     - lib/assets/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

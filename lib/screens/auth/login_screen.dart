@@ -12,7 +12,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  bool _isPasswordVisible = false; 
+  bool _isPasswordVisible = false;
 
   Future<void> loginUser() async {
     try {
@@ -34,6 +34,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -42,8 +44,8 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 80), 
-              TravellyLogo(), 
+              const SizedBox(height: 80),
+              TravellyLogo(isLoginOrSignup: true,), 
               const SizedBox(height: 32),
               const Text(
                 'Login',
@@ -56,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   hintText: 'Enter Your Email',
                   filled: true,
-                  fillColor: Colors.grey[200],
+                  fillColor: isDarkMode ? Colors.grey[700] : Colors.grey[200],
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none,
@@ -71,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   hintText: 'Enter your password',
                   filled: true,
-                  fillColor: Colors.grey[200],
+                  fillColor: isDarkMode ? Colors.grey[700] : Colors.grey[200],
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none,
@@ -79,6 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   suffixIcon: IconButton(
                     icon: Icon(
                       _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      color: isDarkMode ? Colors.white : Colors.black,
                     ),
                     onPressed: () {
                       setState(() {
@@ -87,12 +90,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
                 ),
+                style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),  // Text color fix for dark mode
               ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: loginUser,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
+                  backgroundColor: isDarkMode ? Colors.blueGrey : Colors.purple,
                   minimumSize: Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),

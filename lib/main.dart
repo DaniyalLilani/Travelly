@@ -181,13 +181,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         automaticallyImplyLeading: false, 
-        title: TravellyLogo(),
+        title: TravellyLogo(isLoginOrSignup: false,), 
       ),
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
