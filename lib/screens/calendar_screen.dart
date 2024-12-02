@@ -5,8 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class CalendarScreen extends StatefulWidget {
   final DateTime initialDate;
   final String userId; // Pass user ID to identify the account
+  final String username;
 
-  CalendarScreen({required this.initialDate, required this.userId});
+  CalendarScreen({required this.initialDate, required this.userId, required this.username});
 
   @override
   _CalendarScreenState createState() => _CalendarScreenState();
@@ -47,6 +48,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     List<Map<String, dynamic>> events = snapshot.docs.map((doc) {
       return {
         'id': doc.id,
+        'username': doc['username'],
         'description': doc['description'],
         'time': doc['time'],
         'location': doc['location'] ?? 'No location provided',
@@ -63,6 +65,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     await _firestore.collection('events').add({
       'userId': widget.userId, // Associate event with the user
+      'username': widget.username,
       'date': formattedDate,
       'description': description,
       'time': time,

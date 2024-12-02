@@ -1,9 +1,10 @@
-import 'dart:io';  
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'screens/home_screen.dart';  
+import 'screens/home_screen.dart';
 import 'screens/budget/budget_screen.dart';
 import 'screens/calendar_screen.dart';
 import 'screens/profile/theme_provider.dart';
@@ -17,28 +18,20 @@ import 'maps/map_view.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'services/database_helper.dart';
 
-
-
-
 void main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
     name: 'com.travelly.app', // this gets around duplicate firebase name issue
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
+
   initializeNotifications();
   await dotenv.load(fileName: '.mapkey.env');
 
-  
   final themeProvider = ThemeProvider();
   final isDarkMode = await _loadDarkModePreference();
   themeProvider.setDarkMode(isDarkMode); // Initialize the ThemeProvider with the value
-
-
-
 
   runApp(
     ChangeNotifierProvider<ThemeProvider>.value(
@@ -47,8 +40,6 @@ void main() async {
     ),
   );
 }
-
-
 
 Future<bool> _loadDarkModePreference() async {
   final db = await DatabaseHelper().database;
@@ -64,12 +55,10 @@ Future<bool> _loadDarkModePreference() async {
   return false; // Default to light mode if no preference is stored
 }
 
-
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
 void initializeNotifications() async {
-  // Initialize the plugin for Android and iOS
   const AndroidInitializationSettings androidInitializationSettings =
       AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -78,28 +67,23 @@ void initializeNotifications() async {
 
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
-  // Create a notification channel for Android 8.0+
   if (Platform.isAndroid) {
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'default_channel', // ID of the channel
-      'Default Channel', // Name of the channel
+      'default_channel',
+      'Default Channel',
       description: 'This is the default notification channel.',
-      importance: Importance.high, // High priority for the notification
+      importance: Importance.high,
       playSound: true,
     );
 
-    // Create the channel (required for Android 8.0 and above)
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
   }
 }
-  final DatabaseHelper _dbHelper = DatabaseHelper();
 
-
-
-
+final DatabaseHelper _dbHelper = DatabaseHelper();
 
 class MyApp extends StatelessWidget {
   @override
@@ -109,7 +93,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Travelly',
       debugShowCheckedModeBanner: false,
-      themeMode: themeProvider.currentTheme, // Use the theme from ThemeProvider
+      themeMode: themeProvider.currentTheme,
       theme: ThemeData(
         primarySwatch: Colors.purple,
         brightness: Brightness.light,
@@ -118,19 +102,15 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.purple,
         brightness: Brightness.dark,
       ),
-
-      initialRoute: '/login',  // Force the app to always start at the login page
+      initialRoute: '/login',
       routes: {
         '/login': (context) => LoginScreen(),
         '/signup_screen': (context) => SignupScreen(),
         '/main': (context) => MyHomePage()
-
       },
-
     );
   }
 }
-
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -139,40 +119,67 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
 
-  late String _userId; // Fetch and store the user ID from your auth system.
+  late String _userId = "guest_user"; // Default value
+  late String _userName = "Guest";    // Default value
+  List<Widget>? _pages;               // Make _pages nullable
 
   @override
   void initState() {
     super.initState();
-    // Replace with your logic to fetch the user ID, such as from FirebaseAuth
-    _fetchUserId();;
+    _fetchUserId();
   }
 
   Future<void> _fetchUserId() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
-      setState(() {
-        _userId = user?.email ?? user?.uid ?? "guest_user"; // Use email or UID, fallback to guest_user.
-      });
+
+      if (user != null) {
+        final userId = user.uid; // Use the UID as the document ID
+        final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+
+        if (userDoc.exists) {
+          final data = userDoc.data();
+          setState(() {
+            _userId = userId;
+            _userName = data?['username'] ?? "Unknown User";
+            _initializePages();
+          });
+        } else {
+          setState(() {
+            _userId = userId;
+            _userName = "Unknown User";
+            _initializePages();
+          });
+        }
+      } else {
+        setState(() {
+          _userId = "guest_user";
+          _userName = "Guest";
+          _initializePages();
+        });
+      }
     } catch (e) {
-      debugPrint("Error fetching user ID: $e");
+      debugPrint("Error fetching user details: $e");
       setState(() {
         _userId = "error_user";
+        _userName = "Error User";
+        _initializePages();
       });
     }
   }
 
-  late final List<Widget> _pages = [
-    HomeScreen(userId: _userId),        
-    BudgetScreen(),
-    CalendarScreen(initialDate: DateTime.now(),userId: _userId,),
-    MapView(thunderforestApiKey: dotenv.env['THUNDERFOREST_API_KEY']!),
-    ProfileScreen(),
-  ];
+  void _initializePages() {
+    _pages = [
+      HomeScreen(userId: _userId),
+      BudgetScreen(),
+      CalendarScreen(initialDate: DateTime.now(), userId: _userId, username: _userName),
+      MapView(thunderforestApiKey: dotenv.env['THUNDERFOREST_API_KEY']!),
+      ProfileScreen(),
+    ];
+  }
 
   void _onTap(int index) {
     setState(() {
@@ -182,19 +189,25 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    if (_pages == null) {
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        automaticallyImplyLeading: false, 
-        title: TravellyLogo(isLoginOrSignup: false,), 
+        automaticallyImplyLeading: false,
+        title: TravellyLogo(isLoginOrSignup: false),
       ),
-      body: _pages[_currentIndex],
+      body: _pages![_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed, 
+        type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         onTap: _onTap,
         backgroundColor: Colors.white,
@@ -213,7 +226,6 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: Icon(Icons.event),
             label: 'Calendar',
           ),
-       
           BottomNavigationBarItem(
             icon: Icon(Icons.map),
             label: 'Map',

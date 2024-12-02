@@ -35,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _allEvents = snapshot.docs.map((doc) {
           return {
             'eventName': doc['description'],
+            'eventUser': doc['userId'],
             'eventTime': doc['time'],
             'eventDate': doc['date'],
             'eventId': doc.id,
@@ -221,6 +222,11 @@ class EventDetailsScreen extends StatelessWidget {
                   'Date: ${eventData['date']}',
                   style: TextStyle(fontSize: 18),
                 ),
+                    Text(
+              'User: ${eventData['userId'].split('@')[0]}',
+              style: TextStyle(fontSize: 18),
+              ),
+
               ],
             ),
           ),
