@@ -45,107 +45,73 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
   // Shows a dialog to add a comment
   void showCommentDialog() {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: const Text("Add a comment"),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _commentController,
-                    decoration: const InputDecoration(hintText: "Write your comment here"),
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Add a comment"),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _commentController,
+                  decoration: InputDecoration(hintText: "Write your comment here"),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
+                    final picker = ImagePicker();
+                    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+                    if (pickedFile != null) {
+                      setState(() {
+                        _pickedImage = File(pickedFile.path);
+                      });
+                    }
+                  },
+                  child: Text("Upload an Image"),
+                ),
+                if (_pickedImage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10.0),
+                    child: Image.file(_pickedImage!, width: 100, height: 100),
                   ),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final picker = ImagePicker();
-                      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-                      if (pickedFile != null) {
-                        setState(() {
-                          _pickedImage = File(pickedFile.path);
-                        });
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Image attached successfully!')),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('No image selected.')),
-                        );
-                      }
-                    },
-                    child: const Text("Upload an Image"),
-                  ),
-                  if (_pickedImage != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10.0),
-                      child: Image.file(
-                        _pickedImage!,
-                        width: 150,
-                        height: 150,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                ],
-              ),
+              ],
             ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                if (_commentController.text.isNotEmpty) {
+                  FirebaseFirestore.instance.collection('pins').doc(widget.postId).update({
+                    'comments': FieldValue.arrayUnion([
+                      {
+                        'username': currentUserUsername,  // Use fetched username
+                        'comment': _commentController.text,
+                        'image': _pickedImage != null ? _pickedImage!.path : '',
+                      }
+                    ]),
+                  });
                   Navigator.of(context).pop();
-                },
-                child: const Text("Cancel"),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  if (_commentController.text.isNotEmpty) {
-                    // Add the comment to Firestore
-                    await FirebaseFirestore.instance.collection('pins').doc(widget.postId).update({
-                      'comments': FieldValue.arrayUnion([
-                        {
-                          'username': currentUserUsername,
-                          'comment': _commentController.text,
-                          'image': _pickedImage != null ? _pickedImage!.path : '',
-                        }
-                      ]),
-                    });
-
-                    // Clear inputs after submission
-                    setState(() {
-                      _commentController.clear();
-                      _pickedImage = null;
-                    });
-
-                    // Close the dialog
-                    Navigator.of(context).pop();
-
-                    // Refresh the main screen
-                    setState(() {});
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Comment added successfully!')),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please enter a comment.')),
-                    );
-                  }
-                },
-                child: const Text("Submit"),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
-
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Comment added!')),
+                  );
+                }
+              },
+              child: Text("Submit"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   void initState() {
