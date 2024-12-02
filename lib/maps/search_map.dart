@@ -54,12 +54,12 @@ class _SearchMapState extends State<SearchMap> {
       ),
       actions: [
         TextButton(
-          onPressed: _searchLocation,
-          child: const Text("Search"),
-        ),
-        TextButton(
           onPressed: () => Navigator.pop(context), 
           child: const Text("Cancel"),
+        ),
+        TextButton(
+          onPressed: _searchLocation,
+          child: const Text("Search"),
         ),
       ],
     );

@@ -199,7 +199,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Calendar"),
+        automaticallyImplyLeading: false,
+        title: const Text(
+          'Calendar',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
       ),
       body: Column(
         children: [
