@@ -58,59 +58,67 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Upcoming Events',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Search bar
-          TextField(
-            controller: _searchController,
-            onChanged: (query) => _filterEvents(query),
-            decoration: InputDecoration(
-              prefixIcon: Icon(Icons.search),
-              hintText: 'Search for events near you',
-              filled: true,
-              fillColor: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.grey[800]
-                  : Colors.grey[200],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
+    return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+        ? Colors.black 
+        : Colors.white,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+             Text(
+              'Upcoming Events',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white 
+                : Colors.black, 
               ),
             ),
-          ),
-          const SizedBox(height: 24),
-          // Display filtered events
-          for (var event in _filteredEvents)
-            EventCard(
-              eventName: event['eventName'],
-              eventTime: event['eventTime'],
-              onViewDetails: () {
-                // Navigate to EventDetailsScreen with the eventId
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EventDetailsScreen(
-                      eventId: event['eventId'], // Pass eventId
-                    ),
-                  ),
-                );
-              },
+            const SizedBox(height: 16),
+            // Search bar
+            TextField(
+              controller: _searchController,
+              onChanged: (query) => _filterEvents(query),
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.search),
+                hintText: 'Search for events near you',
+                filled: true,
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey[800]
+                    : Colors.grey[200],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
+              ),
             ),
-        ],
+            const SizedBox(height: 24),
+            // Display filtered events
+            for (var event in _filteredEvents)
+              EventCard(
+                eventName: event['eventName'],
+                eventTime: event['eventTime'],
+                onViewDetails: () {
+                  // Navigate to EventDetailsScreen with the eventId
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EventDetailsScreen(
+                        eventId: event['eventId'], // Pass eventId
+                      ),
+                    ),
+                  );
+                },
+              ),
+          ],
+        ),
       ),
-    );
+      );
+    }
   }
-}
 
 class EventCard extends StatelessWidget {
   final String eventName;

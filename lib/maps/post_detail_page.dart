@@ -151,7 +151,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
           var comments = postData['comments'] ?? []; // Default empty list if null
           var postOwnerId = postData['userID']; // Fetch post owner ID to check if user can rate it
 
-          return Padding(
+          return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

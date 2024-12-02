@@ -106,12 +106,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   fontWeight: FontWeight.bold,
                 ),
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor:  Colors.grey[200],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
               ),
+              style: const TextStyle(
+              color: Color.fromARGB(255, 54, 54, 54),),
             ),
             const SizedBox(height: 16),
             TextField(

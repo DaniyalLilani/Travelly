@@ -124,6 +124,9 @@ Widget build(BuildContext context) {
 
   return Scaffold(
     body: Container(
+      color: Theme.of(context).brightness == Brightness.dark
+      ? Colors.black
+      : Colors.white,
       padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

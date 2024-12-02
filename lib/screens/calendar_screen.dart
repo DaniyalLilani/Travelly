@@ -197,15 +197,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
+
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text(
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        title:  Text(
           'Calendar',
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: isDarkMode ? Colors.white : Colors.black,
           ),
         ),
       ),
@@ -236,6 +240,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 shape: BoxShape.circle,
               ),
             ),
+              availableCalendarFormats: const {
+            CalendarFormat.month: 'Month', // Change label to "Month"
+           
+          },
           ),
           const SizedBox(height: 16),
           Text(
