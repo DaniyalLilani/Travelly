@@ -230,6 +230,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
             onPageChanged: (focusedDay) {
               _focusedDay = focusedDay;
             },
+            headerStyle: HeaderStyle(
+              titleCentered: true, 
+              formatButtonVisible: false, 
+              titleTextStyle: TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+                color: const Color.fromARGB(255, 175, 13, 175), 
+              ),
+              leftChevronIcon: Icon(Icons.chevron_left, color: Colors.black),
+              rightChevronIcon: Icon(Icons.chevron_right, color: Colors.black),
+            ),
             calendarStyle: CalendarStyle(
               selectedDecoration: BoxDecoration(
                 color: Colors.purple,

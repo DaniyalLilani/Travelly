@@ -136,88 +136,77 @@ class _CreatePinState extends State<CreatePin> {
       appBar: AppBar(
         title: const Text('Create a New Pin'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Username: $username',
-              style: const TextStyle(fontSize: 18),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Username: $username',
+                  style: const TextStyle(fontSize: 18),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _addressController,
+                  keyboardType: TextInputType.text,
+                  decoration: const InputDecoration(labelText: 'Enter Address'),
+                ),
+                ElevatedButton(
+                  onPressed: _getCoordinatesFromAddress,
+                  child: const Text('Convert Address to Coordinates'),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _latitudeController,
+                  decoration: const InputDecoration(labelText: 'Latitude'),
+                  keyboardType: TextInputType.number,
+                ),
+                TextField(
+                  controller: _longitudeController,
+                  decoration: const InputDecoration(labelText: 'Longitude'),
+                  keyboardType: TextInputType.number,
+                ),
+                ElevatedButton(
+                  onPressed: _getLocation,
+                  child: const Text('Use Current Location'),
+                ),
+                Text(
+                  _coordinatesResult,
+                  style: const TextStyle(color: Colors.purple),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _descriptionController,
+                  decoration:
+                      const InputDecoration(labelText: 'Enter a description'),
+                  keyboardType: TextInputType.text,
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      await _createPin();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Pin saved successfully!'),
+                        ),
+                      );
+                      Navigator.pop(context, true);
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Failed to save pin: $e'),
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text('Save Pin'),
+                ),
+              ],
             ),
-            
-            const SizedBox(height: 20),
-            TextField(
-              controller: _addressController,
-              keyboardType: TextInputType.text,
-              decoration: const InputDecoration(labelText: 'Enter Address'),
-
-            ), ElevatedButton(
-              onPressed: _getCoordinatesFromAddress,
-              child: const Text('Convert Address to Coordinates'),
-            ),
-            const SizedBox(height: 10),
-
-            TextField(
-              controller: _latitudeController,
-              decoration: const InputDecoration(labelText: 'Latitude'),
-              keyboardType: TextInputType.number,
-
-            ),
-            TextField(
-              controller: _longitudeController,
-              decoration: const InputDecoration(labelText: 'Longitude'),
-              keyboardType: TextInputType.number,
-            ),
-            ElevatedButton(
-              onPressed: _getLocation,
-              child: const Text('Use Current Location'),
-            ),
-            Text(_coordinatesResult, style: const TextStyle(color: Colors.purple)),
-            const SizedBox(height: 20),
-
-
-
-            TextField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Enter a description'),
-              keyboardType: TextInputType.text,
-            ),
-
-            TextField(
-              decoration: const InputDecoration(labelText: 'Add pin'),
-
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed : () async {
-                try {
-                // Step 1: push to firebase
-                  await _createPin();
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Pin saved successfully!')) // Will need to improve UI here
-                );
-
-                // Step 2: reload all pins from firebase on the maps_view page
-                  Navigator.pop(context, true);
-
-
-                
-
-                } catch(e){
-                  ScaffoldMessenger.of(context).showSnackBar(
-                     SnackBar(content: Text('Failed to save pin: $e'))
-                  );
-
-                }
-              
-                
-              },
-              child: const Text('Save Pin'),
-              
-            ),
-          ],
+          ),
         ),
       ),
     );
