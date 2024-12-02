@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -43,75 +44,101 @@ class _PostDetailPageState extends State<PostDetailPage> {
     }
   }
 
+  Future<String> uploadImageToFirebase(File image) async {
+  final storageRef = FirebaseStorage.instance
+      .ref()
+      .child('images/${DateTime.now().millisecondsSinceEpoch}.jpg');
+  final uploadTask = await storageRef.putFile(image);
+
+  print("Upload completed: ${uploadTask.state}");
+  String downloadUrl = await storageRef.getDownloadURL();
+  print("Download URL: $downloadUrl");
+
+  return await storageRef.getDownloadURL(); // Get the public URL
+}
+
+
   // Shows a dialog to add a comment
   void showCommentDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Add a comment"),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 10),
-                TextField(
-                  controller: _commentController,
-                  decoration: InputDecoration(hintText: "Write your comment here"),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text("Add a comment"),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10),
+              TextField(
+                controller: _commentController,
+                decoration: InputDecoration(hintText: "Write your comment here"),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () async {
+                  final picker = ImagePicker();
+                  final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+                  if (pickedFile != null) {
+                    setState(() {
+                      _pickedImage = File(pickedFile.path);
+                    });
+                  }
+                },
+                child: Text("Upload an Image"),
+              ),
+              if (_pickedImage != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: Image.file(_pickedImage!, width: 100, height: 100),
                 ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () async {
-                    final picker = ImagePicker();
-                    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-                    if (pickedFile != null) {
-                      setState(() {
-                        _pickedImage = File(pickedFile.path);
-                      });
-                    }
-                  },
-                  child: Text("Upload an Image"),
-                ),
-                if (_pickedImage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10.0),
-                    child: Image.file(_pickedImage!, width: 100, height: 100),
-                  ),
-              ],
-            ),
+            ],
           ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
                 if (_commentController.text.isNotEmpty) {
-                  FirebaseFirestore.instance.collection('pins').doc(widget.postId).update({
+                  String imageUrl = '';
+                  if (_pickedImage != null) {
+                    imageUrl = await uploadImageToFirebase(_pickedImage!);
+                    print('imageURL: $imageUrl');
+
+                  }
+
+                  await FirebaseFirestore.instance.collection('pins').doc(widget.postId).update({
                     'comments': FieldValue.arrayUnion([
                       {
-                        'username': currentUserUsername,  // Use fetched username
+                        'username': currentUserUsername,
                         'comment': _commentController.text,
-                        'image': _pickedImage != null ? _pickedImage!.path : '',
+                        'image': imageUrl,
                       }
                     ]),
                   });
+
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Comment added!')));
                   Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Comment added!')),
-                  );
                 }
-              },
-              child: Text("Submit"),
-            ),
-          ],
-        );
-      },
-    );
-  }
+              } catch (e) {
+                print("Error adding comment: $e");
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to add comment")));
+              }
+            },
+            child: Text("Submit"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   @override
   void initState() {
@@ -119,118 +146,123 @@ class _PostDetailPageState extends State<PostDetailPage> {
     _fetchCurrentUserId(); // Fetch current user's ID and username when page is loaded
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+@override
+Widget build(BuildContext context) {
+  final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Post Details'),
-        backgroundColor: Colors.purple,
-      ),
-      body: FutureBuilder<DocumentSnapshot>(
-        future: _getPostData(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator()); // Loading state
-          }
+  return Scaffold(
+    appBar: AppBar(
+      title: Text('Post Details'),
+      backgroundColor: Colors.purple,
+    ),
+    body: StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('pins').doc(widget.postId).snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator()); // Loading state
+        }
 
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}')); // Error state
-          }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}')); // Error state
+        }
 
-          if (!snapshot.hasData || !snapshot.data!.exists) {
-            return Center(child: Text('Post not found.'));
-          }
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return Center(child: Text('Post not found.'));
+        }
 
-          var postData = snapshot.data!.data() as Map<String, dynamic>;
-          var postDescription = postData['description'] ?? 'No Description'; // Default value if null
-          var username = postData['username'] ?? 'Unknown'; // Default value if null
-          var location = postData['location'] ?? 'Unknown Location'; // Default value if null
-          var rating = postData['rating'] ?? 0; // Default value if null
-          var comments = postData['comments'] ?? []; // Default empty list if null
-          var postOwnerId = postData['userID']; // Fetch post owner ID to check if user can rate it
+        var postData = snapshot.data!.data() as Map<String, dynamic>;
+        var postDescription = postData['description'] ?? 'No Description'; // Default value if null
+        var username = postData['username'] ?? 'Unknown'; // Default value if null
+        var location = postData['latitude'] + '' + postData['longitude']?? 'Unknown Location'; // Default value if null
+        var rating = postData['rating'] ?? 0; // Default value if null
+        var comments = postData['comments'] ?? []; // Default empty list if null
+        var postOwnerId = postData['userID']; // Fetch post owner ID to check if user can rate it
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(postDescription, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)), // Post title
-                SizedBox(height: 8),
-                Text('Posted by: $username', style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54)),
-                SizedBox(height: 8),
-                Text("Location: $location", style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54)),
-                SizedBox(height: 8),
-                Text("Rating: $rating ⭐", style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54)),
-                SizedBox(height: 16),
-                // Comment Section
-                ElevatedButton(
-                  onPressed: showCommentDialog,
-                  child: Text("Add Comment"),
-                ),
-                SizedBox(height: 20),
-                Text("Comments:"),
-                for (var comment in comments)
-                  ListTile(
-                    title: Row(
-                      children: [
-                        Text("${comment['username'] ?? 'Anonymous'}:", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                      ],
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(comment['comment'] ?? 'No Comment', style: TextStyle(color: isDarkMode ? Colors.white : Colors.grey[700])),
-                        if (comment['image'] != null && comment['image'].isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: comment['image'].startsWith("http")
-                                ? Image.network(comment['image'])
-                                : Image.file(File(comment['image'])),
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(postDescription, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)), // Post title
+              SizedBox(height: 8),
+              Text('Posted by: $username', style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54)),
+              SizedBox(height: 8),
+              Text("Location: $location", style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54)),
+              SizedBox(height: 8),
+              Text("Rating: $rating ⭐", style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54)),
+              SizedBox(height: 16),
+              // Comment Section
+              ElevatedButton(
+                onPressed: showCommentDialog,
+                child: Text("Add Comment"),
+              ),
+              SizedBox(height: 20),
+              Text("Comments:"),
+              for (var comment in comments)
+                ListTile(
+                  title: Row(
+                    children: [
+                      Text("${comment['username'] ?? 'Anonymous'}:", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                    ],
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(comment['comment'] ?? 'No Comment', style: TextStyle(color: isDarkMode ? Colors.white : Colors.grey[700])),
+                      if (comment['image'] != null && comment['image'].isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Image.network(
+                            comment['image'],
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(Icons.broken_image); // Fallback for invalid URLs
+                            },
                           ),
-                      ],
-                    ),
-                  ),
-                SizedBox(height: 20),
-                // Rating Section (enabled only if the current user is not the post owner)
-                if (postOwnerId != currentUserId) ...[
-                  Text("Rate this Post", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  Row(
-                    children: List.generate(5, (index) {
-                      return IconButton(
-                        icon: Icon(
-                          index < _rating ? Icons.star : Icons.star_border,
-                          color: index < _rating ? Colors.yellow : Colors.grey,
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _rating = index + 1.0;
-                          });
-                          FirebaseFirestore.instance.collection('pins').doc(widget.postId).update({
-                            'rating': _rating,
-                          });
-                        },
-                      );
-                    }),
+                    ],
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      FirebaseFirestore.instance.collection('pins').doc(widget.postId).update({
-                        'rating': _rating,
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Rating submitted!')),
-                      );
-                    },
-                    child: Text('Submit Rating'),
-                  ),
-                ],
+                ),
+              SizedBox(height: 20),
+              // Rating Section (enabled only if the current user is not the post owner)
+              if (postOwnerId != currentUserId) ...[
+                Text("Rate this Post", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Row(
+                  children: List.generate(5, (index) {
+                    return IconButton(
+                      icon: Icon(
+                        index < _rating ? Icons.star : Icons.star_border,
+                        color: index < _rating ? Colors.yellow : Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _rating = index + 1.0;
+                        });
+                        FirebaseFirestore.instance.collection('pins').doc(widget.postId).update({
+                          'rating': _rating,
+                        });
+                      },
+                    );
+                  }),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    FirebaseFirestore.instance.collection('pins').doc(widget.postId).update({
+                      'rating': _rating,
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Rating submitted!')),
+                    );
+                  },
+                  child: Text('Submit Rating'),
+                ),
               ],
-            ),
-          );
-        },
-      ),
-    );
-  }
+            ],
+          ),
+        );
+      },
+    ),
+  );
+}
+
+  
 }
