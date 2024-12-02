@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
             for (var event in _filteredEvents)
               EventCard(
                 eventName: event['eventName'],
-                eventTime: event['eventTime'],
+                eventDate: event['eventDate'],
                 onViewDetails: () {
                   // Navigate to EventDetailsScreen with the eventId
                   Navigator.push(
@@ -122,13 +122,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class EventCard extends StatelessWidget {
   final String eventName;
-  final String eventTime;
+  final String eventDate;
   final VoidCallback onViewDetails;
 
   const EventCard({
     Key? key,
     required this.eventName,
-    required this.eventTime,
+    required this.eventDate,
     required this.onViewDetails,
   }) : super(key: key);
 
@@ -144,7 +144,7 @@ class EventCard extends StatelessWidget {
           eventName,
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        subtitle: Text(eventTime),
+        subtitle: Text(eventDate),
         trailing: ElevatedButton.icon(
           onPressed: onViewDetails,
           style: ElevatedButton.styleFrom(
